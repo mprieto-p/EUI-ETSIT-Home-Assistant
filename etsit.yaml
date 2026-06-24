@@ -1,0 +1,4409 @@
+# ============================================================
+# ETSIT - Espacio Urbano Inteligente
+# ============================================================
+
+template:
+  - sensor:
+      # ------------------------------------------------------------
+      # Sensores de prueba iniciales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Radiación UV"
+        unique_id: etsit_radiacion_uv
+        unit_of_measurement: "UV"
+        state: "{{ state_attr('weather.cedint', 'uv_index') | float(0) }}"
+        icon: mdi:sun-wireless
+
+      - name: "ETSIT Irradiancia solar"
+        unique_id: etsit_irradiancia_solar
+        unit_of_measurement: "W/m²"
+        state: >
+          {% set hora = now().hour %}
+          {% set minuto = now().minute %}
+          {% set h = hora + minuto / 60 %}
+          {% set nubosidad = state_attr('weather.cedint', 'cloud_coverage') | float(0) %}
+          {% set factor_nubes = 1 - (nubosidad / 100 * 0.75) %}
+
+          {% if h < 7 or h > 21 %}
+            0
+          {% elif h < 12 %}
+            {{ (((h - 7) * 150) * factor_nubes) | round(0) }}
+          {% elif h < 16 %}
+            {{ ((750 - ((h - 12) * 35)) * factor_nubes) | round(0) }}
+          {% else %}
+            {% set valor = 600 - ((h - 16) * 120) %}
+            {% if valor < 0 %}
+              0
+            {% else %}
+              {{ (valor * factor_nubes) | round(0) }}
+            {% endif %}
+          {% endif %}
+        icon: mdi:white-balance-sunny
+
+      - name: "ETSIT Estado gateway"
+        unique_id: etsit_estado_gateway
+        state: "Conectado"
+
+      # ------------------------------------------------------------
+      # Infraestructura principal - puntos para el mapa
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Gateway"
+        unique_id: etsit_gateway_mapa
+        state: "Gateway"
+        icon: mdi:router-wireless
+        attributes:
+          latitude: "40.45314851233274"
+          longitude: "-3.7278941298875776"
+
+      - name: "ETSIT Repetidor"
+        unique_id: etsit_repetidor_mapa
+        state: "Repetidor"
+        icon: mdi:access-point
+        attributes:
+          latitude: "40.45278262617996"
+          longitude: "-3.7273960192179683"
+
+      - name: "ETSIT Sensor radiacion solar"
+        unique_id: etsit_sensor_radiacion_solar_mapa
+        state: "Sensor radiacion solar"
+        icon: mdi:solar-power
+        attributes:
+          latitude: "40.453367604883724"
+          longitude: "-3.7275687743634975"
+
+      - name: "ETSIT Sensor UV"
+        unique_id: etsit_sensor_uv_mapa
+        state: "Sensor UV"
+        icon: mdi:white-balance-sunny
+        attributes:
+          latitude: "40.45326463147375"
+          longitude: "-3.7270389919172087"
+
+      - name: "ETSIT Multisensor ambiental"
+        unique_id: etsit_multisensor_ambiental_mapa
+        state: "Multisensor ambiental"
+        icon: mdi:leak
+        attributes:
+          latitude: "40.45322519480685"
+          longitude: "-3.7269900446259747"
+
+      - name: "ETSIT Sensor lluvia"
+        unique_id: etsit_sensor_lluvia_mapa
+        state: "Sensor lluvia"
+        icon: mdi:weather-rainy
+        attributes:
+          latitude: "40.453238340365054"
+          longitude: "-3.72692958032504"
+
+      - name: "ETSIT Sensor calidad aire"
+        unique_id: etsit_sensor_calidad_aire_mapa
+        state: "Sensor calidad aire"
+        icon: mdi:air-filter
+        attributes:
+          latitude: "40.452789199002666"
+          longitude: "-3.727413294732522"
+
+      - name: "ETSIT Medidor consumo electrico"
+        unique_id: etsit_medidor_consumo_electrico_mapa
+        state: "Medidor consumo electrico"
+        icon: mdi:meter-electric
+        attributes:
+          latitude: "40.45300391085775"
+          longitude: "-3.726673326859172"
+
+      # ------------------------------------------------------------
+      # Riego - puntos para el mapa
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Riego 1"
+        unique_id: etsit_riego_1_mapa
+        state: "Riego 1"
+        icon: mdi:sprinkler
+        attributes:
+          latitude: "40.45269498848234"
+          longitude: "-3.727447845761627"
+
+      - name: "ETSIT Riego 2"
+        unique_id: etsit_riego_2_mapa
+        state: "Riego 2"
+        icon: mdi:sprinkler
+        attributes:
+          latitude: "40.45256791361779"
+          longitude: "-3.7277040992274952"
+
+      - name: "ETSIT Riego 3"
+        unique_id: etsit_riego_3_mapa
+        state: "Riego 3"
+        icon: mdi:sprinkler
+        attributes:
+          latitude: "40.45285273625575"
+          longitude: "-3.727185833790908"
+
+      - name: "ETSIT Riego 4"
+        unique_id: etsit_riego_4_mapa
+        state: "Riego 4"
+        icon: mdi:sprinkler
+        attributes:
+          latitude: "40.45292722813114"
+          longitude: "-3.727122490237548"
+
+      - name: "ETSIT Riego 5"
+        unique_id: etsit_riego_5_mapa
+        state: "Riego 5"
+        icon: mdi:sprinkler
+        attributes:
+          latitude: "40.45268349399668"
+          longitude: "-3.726995298675219"
+
+      - name: "ETSIT Riego 6"
+        unique_id: etsit_riego_6_mapa
+        state: "Riego 6"
+        icon: mdi:sprinkler
+        attributes:
+          latitude: "40.452721965429895"
+          longitude: "-3.726880701328087"
+
+      # ------------------------------------------------------------
+      # Residuos - puntos para el mapa
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Residuos 1"
+        unique_id: etsit_residuos_1_mapa
+        state: "Residuos 1"
+        icon: mdi:trash-can
+        attributes:
+          latitude: "40.45246548878434"
+          longitude: "-3.726769474490936"
+
+      - name: "ETSIT Residuos 2"
+        unique_id: etsit_residuos_2_mapa
+        state: "Residuos 2"
+        icon: mdi:trash-can
+        attributes:
+          latitude: "40.4524937012624"
+          longitude: "-3.7266346540825452"
+
+      - name: "ETSIT Residuos 3"
+        unique_id: etsit_residuos_3_mapa
+        state: "Residuos 3"
+        icon: mdi:trash-can
+        attributes:
+          latitude: "40.452660411118764"
+          longitude: "-3.726614431016368"
+
+      - name: "ETSIT Residuos 4"
+        unique_id: etsit_residuos_4_mapa
+        state: "Residuos 4"
+        icon: mdi:trash-can
+        attributes:
+          latitude: "40.45301947710003"
+          longitude: "-3.7275413213281725"
+
+      - name: "ETSIT Residuos 5"
+        unique_id: etsit_residuos_5_mapa
+        state: "Residuos 5"
+        icon: mdi:trash-can
+        attributes:
+          latitude: "40.45242188765862"
+          longitude: "-3.727012151226039"
+
+      # ------------------------------------------------------------
+      # Aparcamiento - puntos para el mapa
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Aparcamiento 1"
+        unique_id: etsit_aparcamiento_1_mapa
+        state: "Aparcamiento 1"
+        icon: mdi:parking
+        attributes:
+          latitude: "40.453270822142244"
+          longitude: "-3.7271368601030006"
+
+      - name: "ETSIT Aparcamiento 2"
+        unique_id: etsit_aparcamiento_2_mapa
+        state: "Aparcamiento 2"
+        icon: mdi:parking
+        attributes:
+          latitude: "40.4531554087192"
+          longitude: "-3.727133489592791"
+
+      - name: "ETSIT Aparcamiento 3"
+        unique_id: etsit_aparcamiento_3_mapa
+        state: "Aparcamiento 3"
+        icon: mdi:parking
+        attributes:
+          latitude: "40.45291175750842"
+          longitude: "-3.7267863270411845"
+
+      - name: "ETSIT Aparcamiento 4"
+        unique_id: etsit_aparcamiento_4_mapa
+        state: "Aparcamiento 4"
+        icon: mdi:parking
+        attributes:
+          latitude: "40.452839944351425"
+          longitude: "-3.727369425307474"
+
+      - name: "ETSIT Aparcamiento 5"
+        unique_id: etsit_aparcamiento_5_mapa
+        state: "Aparcamiento 5"
+        icon: mdi:parking
+        attributes:
+          latitude: "40.45259116246171"
+          longitude: "-3.7267054347956927"
+
+      - name: "ETSIT Aparcamiento 6"
+        unique_id: etsit_aparcamiento_6_mapa
+        state: "Aparcamiento 6"
+        icon: mdi:parking
+        attributes:
+          latitude: "40.4525270432693"
+          longitude: "-3.7265571323464637"
+
+      # ------------------------------------------------------------
+      # Contadores de personas - puntos para el mapa
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Contador personas 1"
+        unique_id: etsit_contador_personas_1_mapa
+        state: "Contador personas 1"
+        icon: mdi:account-group
+        attributes:
+          latitude: "40.452544996649344"
+          longitude: "-3.7271065255106555"
+
+      - name: "ETSIT Contador personas 2"
+        unique_id: etsit_contador_personas_2_mapa
+        state: "Contador personas 2"
+        icon: mdi:account-group
+        attributes:
+          latitude: "40.45257833862813"
+          longitude: "-3.726968334592055"
+
+      - name: "ETSIT Contador personas 3"
+        unique_id: etsit_contador_personas_3_mapa
+        state: "Contador personas 3"
+        icon: mdi:account-group
+        attributes:
+          latitude: "40.452598856760694"
+          longitude: "-3.7263852363257657"
+
+      # ------------------------------------------------------------
+      # Farolas / Sensores de luz - puntos para el mapa
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Luz 01"
+        unique_id: etsit_luz_01_mapa
+        state: "Luz 01"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45335545852417"
+          longitude: "-3.727713217348413"
+
+      - name: "ETSIT Luz 02"
+        unique_id: etsit_luz_02_mapa
+        state: "Luz 02"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45327082213993"
+          longitude: "-3.727453688062261"
+
+      - name: "ETSIT Luz 03"
+        unique_id: etsit_luz_03_mapa
+        state: "Luz 03"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45320670359603"
+          longitude: "-3.727824444185336"
+
+      - name: "ETSIT Luz 04"
+        unique_id: etsit_luz_04_mapa
+        state: "Luz 04"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.4532118330818"
+          longitude: "-3.727642436634008"
+
+      - name: "ETSIT Luz 05"
+        unique_id: etsit_luz_05_mapa
+        state: "Luz 05"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45306307783571"
+          longitude: "-3.72731886765387"
+
+      - name: "ETSIT Luz 06"
+        unique_id: etsit_luz_06_mapa
+        state: "Luz 06"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.453022041847795"
+          longitude: "-3.7275076162256173"
+
+      - name: "ETSIT Luz 07"
+        unique_id: etsit_luz_07_mapa
+        state: "Luz 07"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45292458127607"
+          longitude: "-3.72761547255233"
+
+      - name: "ETSIT Luz 08"
+        unique_id: etsit_luz_08_mapa
+        state: "Luz 08"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45276813111535"
+          longitude: "-3.7271941587761095"
+
+      - name: "ETSIT Luz 09"
+        unique_id: etsit_luz_09_mapa
+        state: "Luz 09"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45274248351325"
+          longitude: "-3.7272649394905137"
+
+      - name: "ETSIT Luz 10"
+        unique_id: etsit_luz_10_mapa
+        state: "Luz 10"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45250908988446"
+          longitude: "-3.7272851625517727"
+
+      - name: "ETSIT Luz 11"
+        unique_id: etsit_luz_11_mapa
+        state: "Luz 11"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452457794472764"
+          longitude: "-3.727382907347856"
+
+      - name: "ETSIT Luz 12"
+        unique_id: etsit_luz_12_mapa
+        state: "Luz 12"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45247318310037"
+          longitude: "-3.727571655919603"
+
+      - name: "ETSIT Luz 13"
+        unique_id: etsit_luz_13_mapa
+        state: "Luz 13"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45242445243415"
+          longitude: "-3.727659289185057"
+
+      - name: "ETSIT Luz 14"
+        unique_id: etsit_luz_14_mapa
+        state: "Luz 14"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45240393424834"
+          longitude: "-3.7276323251033787"
+
+      - name: "ETSIT Luz 15"
+        unique_id: etsit_luz_15_mapa
+        state: "Luz 15"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45235007398075"
+          longitude: "-3.727662659695267"
+
+      - name: "ETSIT Luz 16"
+        unique_id: etsit_luz_16_mapa
+        state: "Luz 16"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45238341605626"
+          longitude: "-3.727537950817505"
+
+      - name: "ETSIT Luz 17"
+        unique_id: etsit_luz_17_mapa
+        state: "Luz 17"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45239367515308"
+          longitude: "-3.727382907347856"
+
+      - name: "ETSIT Luz 18"
+        unique_id: etsit_luz_18_mapa
+        state: "Luz 18"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452432146752244"
+          longitude: "-3.727113266531074"
+
+      - name: "ETSIT Luz 19"
+        unique_id: etsit_luz_19_mapa
+        state: "Luz 19"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452442405841616"
+          longitude: "-3.726978446122684"
+
+      - name: "ETSIT Luz 20"
+        unique_id: etsit_luz_20_mapa
+        state: "Luz 20"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45246548878701"
+          longitude: "-3.726779586020309"
+
+      - name: "ETSIT Luz 21"
+        unique_id: etsit_luz_21_mapa
+        state: "Luz 21"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45250908988446"
+          longitude: "-3.72661106050982"
+
+      - name: "ETSIT Luz 22"
+        unique_id: etsit_luz_22_mapa
+        state: "Luz 22"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45255012618561"
+          longitude: "-3.7264796106116393"
+
+      - name: "ETSIT Luz 23"
+        unique_id: etsit_luz_23_mapa
+        state: "Luz 23"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45268349399131"
+          longitude: "-3.7265133157137367"
+
+      - name: "ETSIT Luz 24"
+        unique_id: etsit_luz_24_mapa
+        state: "Luz 24"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45267067017534"
+          longitude: "-3.7266346540812885"
+
+      - name: "ETSIT Luz 25"
+        unique_id: etsit_luz_25_mapa
+        state: "Luz 25"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45261681012157"
+          longitude: "-3.726685211734435"
+
+      - name: "ETSIT Luz 26"
+        unique_id: etsit_luz_26_mapa
+        state: "Luz 26"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452555255721514"
+          longitude: "-3.7271031550004454"
+
+      - name: "ETSIT Luz 27"
+        unique_id: etsit_luz_27_mapa
+        state: "Luz 27"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452691188279736"
+          longitude: "-3.727049226837089"
+
+      - name: "ETSIT Luz 28"
+        unique_id: etsit_luz_28_mapa
+        state: "Luz 28"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452837379592076"
+          longitude: "-3.7266346540812885"
+
+      - name: "ETSIT Luz 29"
+        unique_id: etsit_luz_29_mapa
+        state: "Luz 29"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.452834814834944"
+          longitude: "-3.7268335141836646"
+
+      - name: "ETSIT Luz 30"
+        unique_id: etsit_luz_30_mapa
+        state: "Luz 30"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.4529656173235"
+          longitude: "-3.727099784490236"
+
+      - name: "ETSIT Luz 31"
+        unique_id: etsit_luz_31_mapa
+        state: "Luz 31"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.4531169375318"
+          longitude: "-3.7271031550004454"
+
+      - name: "ETSIT Luz 32"
+        unique_id: etsit_luz_32_mapa
+        state: "Luz 32"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45297844108319"
+          longitude: "-3.72675599244884"
+
+      - name: "ETSIT Luz 33"
+        unique_id: etsit_luz_33_mapa
+        state: "Luz 33"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45309641955743"
+          longitude: "-3.726796438571357"
+
+      - name: "ETSIT Luz 34"
+        unique_id: etsit_luz_34_mapa
+        state: "Luz 34"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45328108110127"
+          longitude: "-3.7271503421433825"
+
+      - name: "ETSIT Luz 35"
+        unique_id: etsit_luz_35_mapa
+        state: "Luz 35"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.453381105899844"
+          longitude: "-3.727170565206928"
+
+      - name: "ETSIT Luz 36"
+        unique_id: etsit_luz_36_mapa
+        state: "Luz 36"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45335289379439"
+          longitude: "-3.7273626842888854"
+
+      - name: "ETSIT Luz 37"
+        unique_id: etsit_luz_37_mapa
+        state: "Luz 37"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.453504213130586"
+          longitude: "-3.7273896483705635"
+
+      - name: "ETSIT Luz 38"
+        unique_id: etsit_luz_38_mapa
+        state: "Luz 38"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.453537554633414"
+          longitude: "-3.727197529288606"
+
+      - name: "ETSIT Luz 39"
+        unique_id: etsit_luz_39_mapa
+        state: "Luz 39"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45368374410442"
+          longitude: "-3.7274334650032905"
+
+      - name: "ETSIT Luz 40"
+        unique_id: etsit_luz_40_mapa
+        state: "Luz 40"
+        icon: mdi:lightbulb-on
+        attributes:
+          latitude: "40.45369656772704"
+          longitude: "-3.7272312343907044"
+
+      # ------------------------------------------------------------
+      # Residuos - sensores de llenado de prueba
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Residuos 1 llenado"
+        unique_id: etsit_residuos_1_llenado
+        state: "35"
+        unit_of_measurement: "%"
+        icon: mdi:trash-can
+        attributes:
+          tipo: "Papelera inteligente"
+          zona: "ETSIT"
+          estado: "Normal"
+
+      - name: "ETSIT Residuos 2 llenado"
+        unique_id: etsit_residuos_2_llenado
+        state: "72"
+        unit_of_measurement: "%"
+        icon: mdi:trash-can
+        attributes:
+          tipo: "Papelera inteligente"
+          zona: "ETSIT"
+          estado: "Casi llena"
+
+      - name: "ETSIT Residuos 3 llenado"
+        unique_id: etsit_residuos_3_llenado
+        state: "18"
+        unit_of_measurement: "%"
+        icon: mdi:trash-can
+        attributes:
+          tipo: "Papelera inteligente"
+          zona: "ETSIT"
+          estado: "Normal"
+
+      - name: "ETSIT Residuos 4 llenado"
+        unique_id: etsit_residuos_4_llenado
+        state: "91"
+        unit_of_measurement: "%"
+        icon: mdi:trash-can-alert
+        attributes:
+          tipo: "Papelera inteligente"
+          zona: "ETSIT"
+          estado: "Recogida necesaria"
+
+      - name: "ETSIT Residuos 5 llenado"
+        unique_id: etsit_residuos_5_llenado
+        state: "54"
+        unit_of_measurement: "%"
+        icon: mdi:trash-can
+        attributes:
+          tipo: "Papelera inteligente"
+          zona: "ETSIT"
+          estado: "Normal"
+
+      # ------------------------------------------------------------
+      # Estado de red - Sensores de prueba
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Red nodos conectados"
+        unique_id: etsit_red_nodos_conectados
+        state: "67"
+        unit_of_measurement: "nodos"
+        icon: mdi:access-point-network
+
+      - name: "ETSIT Red nodos desconectados"
+        unique_id: etsit_red_nodos_desconectados
+        state: "0"
+        unit_of_measurement: "nodos"
+        icon: mdi:access-point-network-off
+
+      - name: "ETSIT Red calidad media"
+        unique_id: etsit_red_calidad_media
+        state: "Buena"
+        icon: mdi:wifi-strength-3
+
+      - name: "ETSIT Gateway RSSI"
+        unique_id: etsit_gateway_rssi
+        state: "-58"
+        unit_of_measurement: "dBm"
+        icon: mdi:wifi
+
+      - name: "ETSIT Repetidor RSSI"
+        unique_id: etsit_repetidor_rssi
+        state: "-67"
+        unit_of_measurement: "dBm"
+        icon: mdi:wifi
+
+      - name: "ETSIT Red hop count medio"
+        unique_id: etsit_red_hop_count_medio
+        state: "1"
+        unit_of_measurement: "saltos"
+        icon: mdi:transit-connection-variant
+
+      # ------------------------------------------------------------
+      # Estado de red - Resumen
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Recepcion datos"
+        unique_id: etsit_recepcion_datos
+        state: "Recibiendo datos"
+        icon: mdi:database-check
+
+      - name: "ETSIT Red peor RSSI"
+        unique_id: etsit_red_peor_rssi
+        state: "-82"
+        unit_of_measurement: "dBm"
+        icon: mdi:wifi-strength-alert-outline
+
+      - name: "ETSIT Red calidad general"
+        unique_id: etsit_red_calidad_general
+        state: >
+          {% set peor_rssi = states('sensor.etsit_red_peor_rssi') | int(0) %}
+          {% if peor_rssi >= -70 %}
+            Buena
+          {% elif peor_rssi >= -85 %}
+            Regular
+          {% else %}
+            Mala
+          {% endif %}
+        icon: >
+          {% set peor_rssi = states('sensor.etsit_red_peor_rssi') | int(0) %}
+          {% if peor_rssi >= -70 %}
+            mdi:wifi-strength-4
+          {% elif peor_rssi >= -85 %}
+            mdi:wifi-strength-2
+          {% else %}
+            mdi:wifi-strength-alert-outline
+          {% endif %}
+
+      # ------------------------------------------------------------
+      # Estado de red - Nivel de bateria
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Residuos 1 bateria"
+        unique_id: etsit_residuos_1_bateria
+        state: "86"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Residuos 2 bateria"
+        unique_id: etsit_residuos_2_bateria
+        state: "72"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Residuos 3 bateria"
+        unique_id: etsit_residuos_3_bateria
+        state: "54"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Residuos 4 bateria"
+        unique_id: etsit_residuos_4_bateria
+        state: "28"
+        unit_of_measurement: "%"
+        icon: mdi:battery-alert
+
+      - name: "ETSIT Residuos 5 bateria"
+        unique_id: etsit_residuos_5_bateria
+        state: "12"
+        unit_of_measurement: "%"
+        icon: mdi:battery-alert-variant
+
+      - name: "ETSIT Riego 1 bateria"
+        unique_id: etsit_riego_1_bateria
+        state: "91"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Riego 2 bateria"
+        unique_id: etsit_riego_2_bateria
+        state: "80"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Riego 3 bateria"
+        unique_id: etsit_riego_3_bateria
+        state: "66"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Riego 4 bateria"
+        unique_id: etsit_riego_4_bateria
+        state: "41"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Riego 5 bateria"
+        unique_id: etsit_riego_5_bateria
+        state: "19"
+        unit_of_measurement: "%"
+        icon: mdi:battery-alert
+
+      - name: "ETSIT Riego 6 bateria"
+        unique_id: etsit_riego_6_bateria
+        state: "73"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Aparcamiento 1 bateria"
+        unique_id: etsit_aparcamiento_1_bateria
+        state: "88"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Aparcamiento 2 bateria"
+        unique_id: etsit_aparcamiento_2_bateria
+        state: "76"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Aparcamiento 3 bateria"
+        unique_id: etsit_aparcamiento_3_bateria
+        state: "64"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Aparcamiento 4 bateria"
+        unique_id: etsit_aparcamiento_4_bateria
+        state: "39"
+        unit_of_measurement: "%"
+        icon: mdi:battery-alert
+
+      - name: "ETSIT Aparcamiento 5 bateria"
+        unique_id: etsit_aparcamiento_5_bateria
+        state: "24"
+        unit_of_measurement: "%"
+        icon: mdi:battery-alert
+
+      - name: "ETSIT Aparcamiento 6 bateria"
+        unique_id: etsit_aparcamiento_6_bateria
+        state: "94"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Sensor UV bateria"
+        unique_id: etsit_sensor_uv_bateria
+        state: "83"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Sensor radiacion solar bateria"
+        unique_id: etsit_sensor_radiacion_solar_bateria
+        state: "79"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Multisensor ambiental bateria"
+        unique_id: etsit_multisensor_ambiental_bateria
+        state: "52"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Sensor lluvia bateria"
+        unique_id: etsit_sensor_lluvia_bateria
+        state: "37"
+        unit_of_measurement: "%"
+        icon: mdi:battery-alert
+
+      - name: "ETSIT Sensor calidad aire bateria"
+        unique_id: etsit_sensor_calidad_aire_bateria
+        state: "68"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      - name: "ETSIT Medidor consumo electrico bateria"
+        unique_id: etsit_medidor_consumo_electrico_bateria
+        state: "100"
+        unit_of_measurement: "%"
+        icon: mdi:battery
+
+      # ------------------------------------------------------------
+      # Iluminacion - Resumen de alumbrado
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Alumbrado luminarias totales"
+        unique_id: etsit_alumbrado_luminarias_totales
+        state: "40"
+        unit_of_measurement: "luminarias"
+        icon: mdi:lightbulb-group
+
+      - name: "ETSIT Alumbrado luminarias encendidas"
+        unique_id: etsit_alumbrado_luminarias_encendidas
+        state: >
+          {{
+            [
+              states('input_boolean.etsit_luz_01_control'),
+              states('input_boolean.etsit_luz_02_control'),
+              states('input_boolean.etsit_luz_03_control'),
+              states('input_boolean.etsit_luz_04_control'),
+              states('input_boolean.etsit_luz_05_control'),
+              states('input_boolean.etsit_luz_06_control'),
+              states('input_boolean.etsit_luz_07_control'),
+              states('input_boolean.etsit_luz_08_control'),
+              states('input_boolean.etsit_luz_09_control'),
+              states('input_boolean.etsit_luz_10_control'),
+              states('input_boolean.etsit_luz_11_control'),
+              states('input_boolean.etsit_luz_12_control'),
+              states('input_boolean.etsit_luz_13_control'),
+              states('input_boolean.etsit_luz_14_control'),
+              states('input_boolean.etsit_luz_15_control'),
+              states('input_boolean.etsit_luz_16_control'),
+              states('input_boolean.etsit_luz_17_control'),
+              states('input_boolean.etsit_luz_18_control'),
+              states('input_boolean.etsit_luz_19_control'),
+              states('input_boolean.etsit_luz_20_control'),
+              states('input_boolean.etsit_luz_21_control'),
+              states('input_boolean.etsit_luz_22_control'),
+              states('input_boolean.etsit_luz_23_control'),
+              states('input_boolean.etsit_luz_24_control'),
+              states('input_boolean.etsit_luz_25_control'),
+              states('input_boolean.etsit_luz_26_control'),
+              states('input_boolean.etsit_luz_27_control'),
+              states('input_boolean.etsit_luz_28_control'),
+              states('input_boolean.etsit_luz_29_control'),
+              states('input_boolean.etsit_luz_30_control'),
+              states('input_boolean.etsit_luz_31_control'),
+              states('input_boolean.etsit_luz_32_control'),
+              states('input_boolean.etsit_luz_33_control'),
+              states('input_boolean.etsit_luz_34_control'),
+              states('input_boolean.etsit_luz_35_control'),
+              states('input_boolean.etsit_luz_36_control'),
+              states('input_boolean.etsit_luz_37_control'),
+              states('input_boolean.etsit_luz_38_control'),
+              states('input_boolean.etsit_luz_39_control'),
+              states('input_boolean.etsit_luz_40_control')
+            ] | select('eq', 'on') | list | count
+          }}
+        unit_of_measurement: "luminarias"
+        icon: mdi:lightbulb-on
+
+      - name: "ETSIT Alumbrado luminarias apagadas"
+        unique_id: etsit_alumbrado_luminarias_apagadas
+        state: >
+          {{
+            states('sensor.etsit_alumbrado_luminarias_totales') | int(0)
+            -
+            states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0)
+          }}
+        unit_of_measurement: "luminarias"
+        icon: mdi:lightbulb-off
+
+      - name: "ETSIT Alumbrado luminarias con fallo"
+        unique_id: etsit_alumbrado_luminarias_con_fallo
+        state: "1"
+        unit_of_measurement: "luminarias"
+        icon: mdi:lightbulb-alert
+
+      - name: "ETSIT Alumbrado intensidad media"
+        unique_id: etsit_alumbrado_intensidad_media
+        state: >
+          {{
+            (
+              states('sensor.etsit_luz_01_intensidad') | int(0) +
+              states('sensor.etsit_luz_02_intensidad') | int(0) +
+              states('sensor.etsit_luz_03_intensidad') | int(0) +
+              states('sensor.etsit_luz_04_intensidad') | int(0) +
+              states('sensor.etsit_luz_05_intensidad') | int(0) +
+              states('sensor.etsit_luz_06_intensidad') | int(0) +
+              states('sensor.etsit_luz_07_intensidad') | int(0) +
+              states('sensor.etsit_luz_08_intensidad') | int(0) +
+              states('sensor.etsit_luz_09_intensidad') | int(0) +
+              states('sensor.etsit_luz_10_intensidad') | int(0) +
+              states('sensor.etsit_luz_11_intensidad') | int(0) +
+              states('sensor.etsit_luz_12_intensidad') | int(0) +
+              states('sensor.etsit_luz_13_intensidad') | int(0) +
+              states('sensor.etsit_luz_14_intensidad') | int(0) +
+              states('sensor.etsit_luz_15_intensidad') | int(0) +
+              states('sensor.etsit_luz_16_intensidad') | int(0) +
+              states('sensor.etsit_luz_17_intensidad') | int(0) +
+              states('sensor.etsit_luz_18_intensidad') | int(0) +
+              states('sensor.etsit_luz_19_intensidad') | int(0) +
+              states('sensor.etsit_luz_20_intensidad') | int(0) +
+              states('sensor.etsit_luz_21_intensidad') | int(0) +
+              states('sensor.etsit_luz_22_intensidad') | int(0) +
+              states('sensor.etsit_luz_23_intensidad') | int(0) +
+              states('sensor.etsit_luz_24_intensidad') | int(0) +
+              states('sensor.etsit_luz_25_intensidad') | int(0) +
+              states('sensor.etsit_luz_26_intensidad') | int(0) +
+              states('sensor.etsit_luz_27_intensidad') | int(0) +
+              states('sensor.etsit_luz_28_intensidad') | int(0) +
+              states('sensor.etsit_luz_29_intensidad') | int(0) +
+              states('sensor.etsit_luz_30_intensidad') | int(0) +
+              states('sensor.etsit_luz_31_intensidad') | int(0) +
+              states('sensor.etsit_luz_32_intensidad') | int(0) +
+              states('sensor.etsit_luz_33_intensidad') | int(0) +
+              states('sensor.etsit_luz_34_intensidad') | int(0) +
+              states('sensor.etsit_luz_35_intensidad') | int(0) +
+              states('sensor.etsit_luz_36_intensidad') | int(0) +
+              states('sensor.etsit_luz_37_intensidad') | int(0) +
+              states('sensor.etsit_luz_38_intensidad') | int(0) +
+              states('sensor.etsit_luz_39_intensidad') | int(0) +
+              states('sensor.etsit_luz_40_intensidad') | int(0)
+            ) / 40
+          | round(0) }}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Alumbrado consumo actual estimado"
+        unique_id: etsit_alumbrado_consumo_actual_estimado
+        state: >
+          {{
+            (
+              states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0)
+              *
+              states('sensor.etsit_alumbrado_potencia_media_luminaria') | int(40)
+              *
+              states('sensor.etsit_alumbrado_intensidad_media') | int(0)
+              / 100
+            ) | round(0)
+          }}
+        unit_of_measurement: "W"
+        icon: mdi:flash
+
+      - name: "ETSIT Alumbrado fallos en luminarias"
+        unique_id: etsit_alumbrado_fallos_en_luminarias
+        state: >
+          {% set fallos = states('sensor.etsit_alumbrado_luminarias_con_fallo') | int(0) %}
+          {% if fallos == 0 %}
+            0 fallos
+          {% elif fallos == 1 %}
+            1 fallo
+          {% else %}
+            {{ fallos }} fallos
+          {% endif %}
+        icon: >
+          {% set fallos = states('sensor.etsit_alumbrado_luminarias_con_fallo') | int(0) %}
+          {% if fallos == 0 %}
+            mdi:lightbulb-check
+          {% else %}
+            mdi:lightbulb-alert
+          {% endif %}
+
+      # ------------------------------------------------------------
+      # Iluminacion - Intensidad de luminarias
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Luz 01 intensidad"
+        unique_id: etsit_luz_01_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_01_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 02 intensidad"
+        unique_id: etsit_luz_02_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_02_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 03 intensidad"
+        unique_id: etsit_luz_03_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_03_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 04 intensidad"
+        unique_id: etsit_luz_04_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_04_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 05 intensidad"
+        unique_id: etsit_luz_05_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_05_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 06 intensidad"
+        unique_id: etsit_luz_06_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_06_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 07 intensidad"
+        unique_id: etsit_luz_07_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_07_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 08 intensidad"
+        unique_id: etsit_luz_08_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_08_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 09 intensidad"
+        unique_id: etsit_luz_09_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_09_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 10 intensidad"
+        unique_id: etsit_luz_10_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_10_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 11 intensidad"
+        unique_id: etsit_luz_11_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_11_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 12 intensidad"
+        unique_id: etsit_luz_12_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_12_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 13 intensidad"
+        unique_id: etsit_luz_13_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_13_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 14 intensidad"
+        unique_id: etsit_luz_14_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_14_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 15 intensidad"
+        unique_id: etsit_luz_15_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_15_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 16 intensidad"
+        unique_id: etsit_luz_16_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_16_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 17 intensidad"
+        unique_id: etsit_luz_17_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_17_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 18 intensidad"
+        unique_id: etsit_luz_18_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_18_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 19 intensidad"
+        unique_id: etsit_luz_19_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_19_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 20 intensidad"
+        unique_id: etsit_luz_20_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_20_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 21 intensidad"
+        unique_id: etsit_luz_21_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_21_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 22 intensidad"
+        unique_id: etsit_luz_22_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_22_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 23 intensidad"
+        unique_id: etsit_luz_23_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_23_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 24 intensidad"
+        unique_id: etsit_luz_24_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_24_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 25 intensidad"
+        unique_id: etsit_luz_25_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_25_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 26 intensidad"
+        unique_id: etsit_luz_26_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_26_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 27 intensidad"
+        unique_id: etsit_luz_27_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_27_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 28 intensidad"
+        unique_id: etsit_luz_28_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_28_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 29 intensidad"
+        unique_id: etsit_luz_29_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_29_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 30 intensidad"
+        unique_id: etsit_luz_30_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_30_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 31 intensidad"
+        unique_id: etsit_luz_31_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_31_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 32 intensidad"
+        unique_id: etsit_luz_32_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_32_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 33 intensidad"
+        unique_id: etsit_luz_33_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_33_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 34 intensidad"
+        unique_id: etsit_luz_34_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_34_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 35 intensidad"
+        unique_id: etsit_luz_35_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_35_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 36 intensidad"
+        unique_id: etsit_luz_36_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_36_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 37 intensidad"
+        unique_id: etsit_luz_37_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_37_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 38 intensidad"
+        unique_id: etsit_luz_38_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_38_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 39 intensidad"
+        unique_id: etsit_luz_39_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_39_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Luz 40 intensidad"
+        unique_id: etsit_luz_40_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_luz_40_control', 'on') %}
+            {{ states('sensor.etsit_alumbrado_intensidad_aplicada') | int(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      # ------------------------------------------------------------
+      # Iluminacion - Condiciones de encendido automatico
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Alumbrado umbral encendido"
+        unique_id: etsit_alumbrado_umbral_encendido
+        state: "120"
+        unit_of_measurement: "W/m²"
+        icon: mdi:weather-sunset-down
+
+      - name: "ETSIT Alumbrado luz natural"
+        unique_id: etsit_alumbrado_luz_natural
+        state: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | int(0) %}
+          {% if irradiancia >= 300 %}
+            Alta
+          {% elif irradiancia >= 120 %}
+            Media
+          {% else %}
+            Baja
+          {% endif %}
+        icon: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | int(0) %}
+          {% if irradiancia >= 300 %}
+            mdi:white-balance-sunny
+          {% elif irradiancia >= 120 %}
+            mdi:weather-partly-cloudy
+          {% else %}
+            mdi:weather-night
+          {% endif %}
+
+      - name: "ETSIT Alumbrado condicion cielo"
+        unique_id: etsit_alumbrado_condicion_cielo
+        state: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | int(0) %}
+          {% if irradiancia >= 500 %}
+            Soleado
+          {% elif irradiancia >= 200 %}
+            Parcialmente nublado
+          {% elif irradiancia >= 80 %}
+            Nublado
+          {% else %}
+            Muy poca luz
+          {% endif %}
+        icon: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | int(0) %}
+          {% if irradiancia >= 500 %}
+            mdi:weather-sunny
+          {% elif irradiancia >= 200 %}
+            mdi:weather-partly-cloudy
+          {% elif irradiancia >= 80 %}
+            mdi:weather-cloudy
+          {% else %}
+            mdi:weather-night
+          {% endif %}
+
+      - name: "ETSIT Alumbrado recomendacion"
+        unique_id: etsit_alumbrado_recomendacion
+        state: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | int(0) %}
+          {% set umbral = states('sensor.etsit_alumbrado_umbral_encendido') | int(120) %}
+          {% if irradiancia < umbral %}
+            Encender luminarias
+          {% elif irradiancia < 200 %}
+            Preparar encendido
+          {% else %}
+            Mantener apagadas
+          {% endif %}
+        icon: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | int(0) %}
+          {% set umbral = states('sensor.etsit_alumbrado_umbral_encendido') | int(120) %}
+          {% if irradiancia < umbral %}
+            mdi:lightbulb-on
+          {% elif irradiancia < 200 %}
+            mdi:lightbulb-auto
+          {% else %}
+            mdi:lightbulb-off
+          {% endif %}
+
+      - name: "ETSIT Horas luz hoy"
+        unique_id: etsit_horas_luz_hoy
+        state: >
+          {% set next_rising = as_timestamp(state_attr('sun.sun', 'next_rising')) %}
+          {% set next_setting = as_timestamp(state_attr('sun.sun', 'next_setting')) %}
+
+          {% if next_rising is not none and next_setting is not none %}
+            {% if next_setting > next_rising %}
+              {{ ((next_setting - next_rising) / 3600) | round(1) }}
+            {% else %}
+              {{ (24 - ((next_rising - next_setting) / 3600)) | round(1) }}
+            {% endif %}
+          {% else %}
+            unknown
+          {% endif %}
+        unit_of_measurement: "h"
+        icon: mdi:weather-sunny
+
+      # ------------------------------------------------------------
+      # Iluminacion - Historial y consumo estimado
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Alumbrado potencia media luminaria"
+        unique_id: etsit_alumbrado_potencia_media_luminaria
+        state: "40"
+        unit_of_measurement: "W"
+        icon: mdi:lightning-bolt
+
+      - name: "ETSIT Alumbrado tiempo encendido hoy"
+        unique_id: etsit_alumbrado_tiempo_encendido_hoy
+        state: "6.4"
+        unit_of_measurement: "h"
+        icon: mdi:timer-outline
+
+      - name: "ETSIT Alumbrado tiempo encendido semana"
+        unique_id: etsit_alumbrado_tiempo_encendido_semana
+        state: "42"
+        unit_of_measurement: "h"
+        icon: mdi:calendar-week
+
+      - name: "ETSIT Alumbrado tiempo encendido mes"
+        unique_id: etsit_alumbrado_tiempo_encendido_mes
+        state: "180"
+        unit_of_measurement: "h"
+        icon: mdi:calendar-month
+
+      - name: "ETSIT Alumbrado consumo estimado hoy"
+        unique_id: etsit_alumbrado_consumo_estimado_hoy
+        state: >
+          {{
+            (
+              states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0)
+              *
+              states('sensor.etsit_alumbrado_potencia_media_luminaria') | int(40)
+              *
+              states('sensor.etsit_alumbrado_tiempo_encendido_hoy') | float(0)
+              *
+              states('sensor.etsit_alumbrado_intensidad_media') | int(0)
+              / 100
+              / 1000
+            ) | round(2)
+          }}
+        unit_of_measurement: "kWh"
+        icon: mdi:flash
+
+      - name: "ETSIT Alumbrado consumo estimado semana"
+        unique_id: etsit_alumbrado_consumo_estimado_semana
+        state: >
+          {{
+            (
+              states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0)
+              *
+              states('sensor.etsit_alumbrado_potencia_media_luminaria') | int(40)
+              *
+              states('sensor.etsit_alumbrado_tiempo_encendido_semana') | float(0)
+              *
+              states('sensor.etsit_alumbrado_intensidad_media') | int(0)
+              / 100
+              / 1000
+            ) | round(2)
+          }}
+        unit_of_measurement: "kWh"
+        icon: mdi:flash
+
+      - name: "ETSIT Alumbrado consumo estimado mes"
+        unique_id: etsit_alumbrado_consumo_estimado_mes
+        state: >
+          {{
+            (
+              states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0)
+              *
+              states('sensor.etsit_alumbrado_potencia_media_luminaria') | int(40)
+              *
+              states('sensor.etsit_alumbrado_tiempo_encendido_mes') | float(0)
+              *
+              states('sensor.etsit_alumbrado_intensidad_media') | int(0)
+              / 100
+              / 1000
+            ) | round(2)
+          }}
+        unit_of_measurement: "kWh"
+        icon: mdi:flash
+
+      # ------------------------------------------------------------
+      # Aparcamiento - Resumen
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Aparcamiento plazas totales"
+        unique_id: etsit_aparcamiento_plazas_totales
+        state: "6"
+        unit_of_measurement: "plazas"
+        icon: mdi:parking
+
+      - name: "ETSIT Aparcamiento plazas ocupadas"
+        unique_id: etsit_aparcamiento_plazas_ocupadas
+        state: >
+          {{
+            [
+              states('binary_sensor.etsit_aparcamiento_1_ocupacion'),
+              states('binary_sensor.etsit_aparcamiento_2_ocupacion'),
+              states('binary_sensor.etsit_aparcamiento_3_ocupacion'),
+              states('binary_sensor.etsit_aparcamiento_4_ocupacion'),
+              states('binary_sensor.etsit_aparcamiento_5_ocupacion'),
+              states('binary_sensor.etsit_aparcamiento_6_ocupacion')
+            ] | select('eq', 'on') | list | count
+          }}
+        unit_of_measurement: "plazas"
+        icon: mdi:car
+
+      - name: "ETSIT Aparcamiento plazas libres"
+        unique_id: etsit_aparcamiento_plazas_libres
+        state: >
+          {{
+            states('sensor.etsit_aparcamiento_plazas_totales') | int(0)
+            -
+            states('sensor.etsit_aparcamiento_plazas_ocupadas') | int(0)
+          }}
+        unit_of_measurement: "plazas"
+        icon: mdi:car-outline
+
+      - name: "ETSIT Aparcamiento ocupacion media"
+        unique_id: etsit_aparcamiento_ocupacion_media
+        state: >
+          {{
+            (
+              states('sensor.etsit_aparcamiento_plazas_ocupadas') | float(0)
+              /
+              states('sensor.etsit_aparcamiento_plazas_totales') | float(1)
+              *
+              100
+            ) | round(0)
+          }}
+        unit_of_measurement: "%"
+        icon: mdi:chart-pie
+
+      # ------------------------------------------------------------
+      # Riego - Condiciones ambientales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Riego humedad suelo media"
+        unique_id: etsit_riego_humedad_suelo_media
+        state: "20"
+        unit_of_measurement: "%"
+        icon: mdi:water-percent
+
+      - name: "ETSIT Riego temperatura suelo"
+        unique_id: etsit_riego_temperatura_suelo
+        state: >
+          {% set exterior = states('sensor.etsit_temperatura_exterior') | float(0) %}
+          {{ (exterior - 8) | round(1) }}
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer
+
+      - name: "ETSIT Riego lluvia ultima hora"
+        unique_id: etsit_riego_lluvia_ultima_hora
+        state: "0"
+        unit_of_measurement: "mm"
+        icon: mdi:weather-rainy
+
+      - name: "ETSIT Riego probabilidad lluvia"
+        unique_id: etsit_riego_probabilidad_lluvia
+        state: "15"
+        unit_of_measurement: "%"
+        icon: mdi:weather-pouring
+
+      - name: "ETSIT Riego recomendacion"
+        unique_id: etsit_riego_recomendacion
+        state: >
+          {% set humedad = states('sensor.etsit_riego_humedad_suelo_media') | float(0) %}
+          {% set lluvia = states('sensor.etsit_riego_lluvia_ultima_hora') | float(0) %}
+          {% set prob_lluvia = states('sensor.etsit_riego_probabilidad_lluvia') | float(0) %}
+
+          {% if lluvia > 0 %}
+            No regar: lluvia reciente
+          {% elif prob_lluvia >= 70 %}
+            No regar: alta probabilidad de lluvia
+          {% elif humedad < 30 %}
+            Regar recomendado
+          {% elif humedad < 45 %}
+            Vigilar humedad
+          {% else %}
+            No regar: humedad suficiente
+          {% endif %}
+        icon: mdi:sprinkler-variant
+
+      # ------------------------------------------------------------
+      # Riego - Consumo de agua estimado
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Riego caudal por zona"
+        unique_id: etsit_riego_caudal_por_zona
+        state: "8"
+        unit_of_measurement: "L/min"
+        icon: mdi:water-pump
+
+      - name: "ETSIT Riego zonas activas"
+        unique_id: etsit_riego_zonas_activas
+        state: >
+          {{
+            [
+              states('binary_sensor.etsit_riego_1_estado'),
+              states('binary_sensor.etsit_riego_2_estado'),
+              states('binary_sensor.etsit_riego_3_estado'),
+              states('binary_sensor.etsit_riego_4_estado'),
+              states('binary_sensor.etsit_riego_5_estado'),
+              states('binary_sensor.etsit_riego_6_estado')
+            ] | select('eq', 'on') | list | count
+          }}
+        unit_of_measurement: "zonas"
+        icon: mdi:sprinkler
+
+      - name: "ETSIT Riego caudal actual estimado"
+        unique_id: etsit_riego_caudal_actual_estimado
+        state: >
+          {% set zonas = states('sensor.etsit_riego_zonas_activas') | float(0) %}
+          {% set caudal = states('sensor.etsit_riego_caudal_por_zona') | float(0) %}
+          {{ (zonas * caudal) | round(1) }}
+        unit_of_measurement: "L/min"
+        icon: mdi:waves-arrow-right
+
+      - name: "ETSIT Riego consumo estimado por ciclo"
+        unique_id: etsit_riego_consumo_estimado_por_ciclo
+        state: >
+          {% set zonas = states('sensor.etsit_riego_zonas_activas') | float(0) %}
+          {% set caudal = states('sensor.etsit_riego_caudal_por_zona') | float(0) %}
+          {% set duracion = states('input_number.etsit_riego_duracion') | float(0) / 60 %}
+          {{ (zonas * caudal * duracion) | round(1) }}
+        unit_of_measurement: "L"
+        icon: mdi:water
+
+      - name: "ETSIT Riego consumo diario estimado"
+        unique_id: etsit_riego_consumo_diario_estimado
+        state: >
+          {% set caudal = states('sensor.etsit_riego_caudal_por_zona') | float(0) %}
+          {% set duracion = states('input_number.etsit_riego_duracion') | float(0) / 60 %}
+          {% set zonas_totales = 6 %}
+          {{ (zonas_totales * caudal * duracion) | round(1) }}
+        unit_of_measurement: "L"
+        icon: mdi:water-check
+
+      - name: "ETSIT Riego consumo semanal estimado"
+        unique_id: etsit_riego_consumo_semanal_estimado
+        state: >
+          {% set caudal = states('sensor.etsit_riego_caudal_por_zona') | float(0) %}
+
+          {% set z1 = states('sensor.etsit_riego_zona_1_tiempo_semanal') | float(0) %}
+          {% set z2 = states('sensor.etsit_riego_zona_2_tiempo_semanal') | float(0) %}
+          {% set z3 = states('sensor.etsit_riego_zona_3_tiempo_semanal') | float(0) %}
+          {% set z4 = states('sensor.etsit_riego_zona_4_tiempo_semanal') | float(0) %}
+          {% set z5 = states('sensor.etsit_riego_zona_5_tiempo_semanal') | float(0) %}
+          {% set z6 = states('sensor.etsit_riego_zona_6_tiempo_semanal') | float(0) %}
+
+          {% set horas_totales = z1 + z2 + z3 + z4 + z5 + z6 %}
+
+          {{ (horas_totales * 60 * caudal) | round(1) }}
+        unit_of_measurement: "L"
+        icon: mdi:calendar-week
+
+      # ------------------------------------------------------------
+      # Consumo energetico - Medidas electricas principales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Consumo potencia"
+        unique_id: etsit_consumo_potencia
+        state: >
+          {% set h = now().hour %}
+          {% set m = now().minute %}
+          {% set dia = now().weekday() %}
+          {% set laborable = dia < 5 %}
+
+          {% if not laborable %}
+            {% set base = 8000 %}
+          {% elif h < 6 %}
+            {% set base = 6000 %}
+          {% elif h < 8 %}
+            {% set base = 14000 %}
+          {% elif h < 10 %}
+            {% set base = 32000 %}
+          {% elif h < 14 %}
+            {% set base = 45000 %}
+          {% elif h < 17 %}
+            {% set base = 38000 %}
+          {% elif h < 20 %}
+            {% set base = 24000 %}
+          {% else %}
+            {% set base = 9000 %}
+          {% endif %}
+
+          {% set variacion = ((m % 10) - 5) * 250 %}
+          {{ (base + variacion) | round(0) }}
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        icon: mdi:flash
+
+      - name: "ETSIT Consumo corriente"
+        unique_id: etsit_consumo_corriente
+        state: >
+          {% set potencia = states('sensor.etsit_consumo_potencia') | float(0) %}
+          {% set tension_trifasica = 400 %}
+          {% set factor_potencia = states('sensor.etsit_consumo_factor_potencia') | float(0.94) %}
+          {{ (potencia / (1.732 * tension_trifasica * factor_potencia)) | round(1) }}
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        icon: mdi:current-ac
+
+      - name: "ETSIT Consumo tension"
+        unique_id: etsit_consumo_tension
+        state: "230"
+        unit_of_measurement: "V"
+        icon: mdi:sine-wave
+
+      - name: "ETSIT Consumo factor potencia"
+        unique_id: etsit_consumo_factor_potencia
+        state: "0.94"
+        icon: mdi:cosine-wave
+
+      # ------------------------------------------------------------
+      # Radiacion solar - Medidas principales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Solar nubosidad"
+        unique_id: etsit_solar_nubosidad
+        state: "{{ state_attr('weather.cedint', 'cloud_coverage') | float(0) }}"
+        unit_of_measurement: "%"
+        icon: mdi:weather-cloudy
+
+      - name: "ETSIT Solar estado del cielo"
+        unique_id: etsit_solar_estado_cielo
+        state: >
+          {% set estado = states('weather.cedint') %}
+          {% if estado == 'sunny' %}
+            Despejado
+          {% elif estado == 'partlycloudy' %}
+            Parcialmente nublado
+          {% elif estado == 'cloudy' %}
+            Nublado
+          {% elif estado == 'rainy' %}
+            Lluvia
+          {% elif estado == 'pouring' %}
+            Lluvia intensa
+          {% else %}
+            {{ estado }}
+          {% endif %}
+        icon: mdi:weather-partly-cloudy
+
+      - name: "ETSIT Solar nivel de radiacion"
+        unique_id: etsit_solar_nivel_radiacion
+        state: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | float(0) %}
+          {% if irradiancia == 0 %}
+            Sin radiación solar
+          {% elif irradiancia < 200 %}
+            Baja
+          {% elif irradiancia < 600 %}
+            Media
+          {% else %}
+            Alta
+          {% endif %}
+        icon: mdi:solar-power
+      # ------------------------------------------------------------
+      # Temperatura - Medidas ambientales desde weather.cedint
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Temperatura exterior"
+        unique_id: etsit_temperatura_exterior
+        state: "{{ state_attr('weather.cedint', 'temperature') | float(0) }}"
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer
+
+      - name: "ETSIT Temperatura interior"
+        unique_id: etsit_temperatura_interior
+        state: >
+          {% set exterior = states('sensor.etsit_temperatura_exterior') | float(0) %}
+          {{ (exterior - 5) | round(1) }}
+        unit_of_measurement: "°C"
+        icon: mdi:home-thermometer
+
+      - name: "ETSIT Humedad relativa"
+        unique_id: etsit_humedad_relativa
+        state: "{{ state_attr('weather.cedint', 'humidity') | float(0) }}"
+        unit_of_measurement: "%"
+        icon: mdi:water-percent
+
+      - name: "ETSIT Estado meteorologico"
+        unique_id: etsit_estado_meteorologico
+        state: >
+          {% set estado = states('weather.cedint') %}
+          {% if estado == 'sunny' %}
+            Despejado
+          {% elif estado == 'clear-night' %}
+            Noche despejada
+          {% elif estado == 'partlycloudy' %}
+            Parcialmente nublado
+          {% elif estado == 'cloudy' %}
+            Nublado
+          {% elif estado == 'rainy' %}
+            Lluvia
+          {% elif estado == 'pouring' %}
+            Lluvia intensa
+          {% elif estado == 'windy' %}
+            Viento
+          {% elif estado == 'fog' %}
+            Niebla
+          {% else %}
+            {{ estado }}
+          {% endif %}
+        icon: mdi:weather-partly-cloudy
+
+      - name: "ETSIT Punto de rocio"
+        unique_id: etsit_punto_de_rocio
+        state: "{{ state_attr('weather.cedint', 'dew_point') | float(0) }}"
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer-water
+
+      - name: "ETSIT Presion atmosferica"
+        unique_id: etsit_presion_atmosferica
+        state: "{{ state_attr('weather.cedint', 'pressure') | float(0) }}"
+        unit_of_measurement: "hPa"
+        icon: mdi:gauge
+
+      - name: "ETSIT Velocidad viento"
+        unique_id: etsit_velocidad_viento
+        state: "{{ state_attr('weather.cedint', 'wind_speed') | float(0) }}"
+        unit_of_measurement: "km/h"
+        icon: mdi:weather-windy
+
+      - name: "ETSIT Direccion viento"
+        unique_id: etsit_direccion_viento
+        state: "{{ state_attr('weather.cedint', 'wind_bearing') | float(0) }}"
+        unit_of_measurement: "°"
+        icon: mdi:compass
+
+      - name: "ETSIT Temperatura sensacion termica"
+        unique_id: etsit_temperatura_sensacion_termica
+        state: >
+          {% set temp = states('sensor.etsit_temperatura_exterior') | float(0) %}
+          {% set humedad = states('sensor.etsit_humedad_relativa') | float(0) %}
+          {% if temp >= 30 %}
+            {{ (temp + ((humedad - 30) * 0.04)) | round(1) }}
+          {% else %}
+            {{ temp | round(1) }}
+          {% endif %}
+        unit_of_measurement: "°C"
+        icon: mdi:thermometer-lines
+
+      - name: "ETSIT Temperatura estado termico"
+        unique_id: etsit_temperatura_estado_termico
+        state: >
+          {% set temp = states('sensor.etsit_temperatura_sensacion_termica') | float(0) %}
+          {% if temp < 10 %}
+            Frio intenso
+          {% elif temp < 18 %}
+            Frio
+          {% elif temp < 26 %}
+            Confortable
+          {% elif temp < 32 %}
+            Calor
+          {% else %}
+            Calor intenso
+          {% endif %}
+        icon: mdi:thermometer-alert
+
+      - name: "ETSIT Alumbrado intensidad recomendada"
+        unique_id: etsit_alumbrado_intensidad_recomendada
+        state: >
+          {% set irradiancia = states('sensor.etsit_irradiancia_solar') | float(0) %}
+          {% set nubosidad = states('sensor.etsit_solar_nubosidad') | float(0) %}
+          {% set presencia = is_state('input_boolean.etsit_presencia_alumbrado', 'on') %}
+          {% set hora = now().hour %}
+
+          {% if irradiancia >= 300 %}
+            {% set base = 0 %}
+          {% elif irradiancia >= 200 %}
+            {% set base = 30 %}
+          {% elif irradiancia >= 120 %}
+            {% set base = 50 %}
+          {% elif irradiancia >= 60 %}
+            {% set base = 70 %}
+          {% else %}
+            {% set base = 90 %}
+          {% endif %}
+
+          {% if nubosidad >= 80 and base > 0 %}
+            {% set base = base + 10 %}
+          {% endif %}
+
+          {% if presencia and base > 0 %}
+            {% set base = 90 %}
+          {% elif not presencia and base > 0 %}
+            {% set base = 35 %}
+          {% endif %}
+
+          {% if hora >= 0 and hora < 6 and not presencia %}
+            {% set base = 25 %}
+          {% endif %}
+
+          {{ [base, 100] | min }}
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Alumbrado intensidad aplicada"
+        unique_id: etsit_alumbrado_intensidad_aplicada
+        state: "{{ states('input_number.etsit_alumbrado_intensidad_general') | int(0) }}"
+        unit_of_measurement: "%"
+        icon: mdi:brightness-6
+
+      - name: "ETSIT Alumbrado modo intensidad"
+        unique_id: etsit_alumbrado_modo_intensidad
+        state: >
+          {% if is_state('input_boolean.etsit_alumbrado_modo_manual_intensidad', 'on') %}
+            Manual temporal
+          {% else %}
+            Automático
+          {% endif %}
+        icon: >
+          {% if is_state('input_boolean.etsit_alumbrado_modo_manual_intensidad', 'on') %}
+            mdi:tune-variant
+          {% else %}
+            mdi:brightness-auto
+          {% endif %}
+
+      # ------------------------------------------------------------
+      # Iluminacion - Avisos numericos
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Alumbrado farolas apagadas con encendido recomendado"
+        unique_id: etsit_alumbrado_farolas_apagadas_con_encendido_recomendado
+        state: >
+          {% set encendidas = states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0) %}
+          {% set totales = states('sensor.etsit_alumbrado_luminarias_totales') | int(40) %}
+          {% if is_state('sensor.etsit_alumbrado_recomendacion', 'Encender luminarias') %}
+            {{ totales - encendidas }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "farolas"
+        icon: mdi:lightbulb-question
+
+      - name: "ETSIT Alumbrado farolas encendidas con luz natural suficiente"
+        unique_id: etsit_alumbrado_farolas_encendidas_con_luz_natural_suficiente
+        state: >
+          {% set encendidas = states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0) %}
+          {% if is_state('sensor.etsit_alumbrado_recomendacion', 'Mantener apagadas') %}
+            {{ encendidas }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "farolas"
+        icon: mdi:weather-sunny-alert
+
+      # ------------------------------------------------------------
+      # Calidad del aire - Medidas principales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Calidad aire PM2.5"
+        unique_id: etsit_calidad_aire_pm25
+        state: >
+          {% set v = states('sensor.pm2_5_rlink') %}
+          {% if v not in ['unknown', 'unavailable', 'none'] %}
+            {{ v | float(0) }}
+          {% else %}
+            {{ (8 + (now().minute % 6) * 0.8) | round(1) }}
+          {% endif %}
+        unit_of_measurement: "µg/m³"
+        icon: mdi:molecule
+
+      - name: "ETSIT Calidad aire PM10"
+        unique_id: etsit_calidad_aire_pm10
+        state: >
+          {% set v = states('sensor.pm10_rlink') %}
+          {% if v not in ['unknown', 'unavailable', 'none'] %}
+            {{ v | float(0) }}
+          {% else %}
+            {{ (18 + (now().minute % 8) * 1.2) | round(1) }}
+          {% endif %}
+        unit_of_measurement: "µg/m³"
+        icon: mdi:blur
+
+      - name: "ETSIT Calidad aire CO"
+        unique_id: etsit_calidad_aire_co
+        state: >
+          {% set v = states('sensor.co_rlink') %}
+          {% if v not in ['unknown', 'unavailable', 'none'] %}
+            {{ v | float(0) }}
+          {% else %}
+            {{ (0.2 + (now().minute % 5) * 0.03) | round(2) }}
+          {% endif %}
+        unit_of_measurement: "ppm"
+        icon: mdi:molecule-co
+
+      - name: "ETSIT Calidad aire NO2"
+        unique_id: etsit_calidad_aire_no2
+        state: >
+          {% set v = states('sensor.no2_rlink') %}
+          {% if v not in ['unknown', 'unavailable', 'none'] %}
+            {{ v | float(0) }}
+          {% else %}
+            {{ (18 + (now().minute % 7) * 1.5) | round(1) }}
+          {% endif %}
+        unit_of_measurement: "µg/m³"
+        icon: mdi:molecule
+
+      - name: "ETSIT Calidad aire indice"
+        unique_id: etsit_calidad_aire_indice
+        state: >
+          {% set pm25 = states('sensor.etsit_calidad_aire_pm25') %}
+          {% set pm10 = states('sensor.etsit_calidad_aire_pm10') %}
+          {% set no2 = states('sensor.etsit_calidad_aire_no2') %}
+          {% set ns = namespace(score=1, datos=0) %}
+
+          {% if pm25 not in ['unknown', 'unavailable', 'none'] %}
+            {% set ns.datos = ns.datos + 1 %}
+            {% set v = pm25 | float(0) %}
+            {% if v > 35 %}
+              {% set ns.score = [ns.score, 4] | max %}
+            {% elif v > 25 %}
+              {% set ns.score = [ns.score, 3] | max %}
+            {% elif v > 15 %}
+              {% set ns.score = [ns.score, 2] | max %}
+            {% endif %}
+          {% endif %}
+
+          {% if pm10 not in ['unknown', 'unavailable', 'none'] %}
+            {% set ns.datos = ns.datos + 1 %}
+            {% set v = pm10 | float(0) %}
+            {% if v > 50 %}
+              {% set ns.score = [ns.score, 4] | max %}
+            {% elif v > 40 %}
+              {% set ns.score = [ns.score, 3] | max %}
+            {% elif v > 20 %}
+              {% set ns.score = [ns.score, 2] | max %}
+            {% endif %}
+          {% endif %}
+
+          {% if no2 not in ['unknown', 'unavailable', 'none'] %}
+            {% set ns.datos = ns.datos + 1 %}
+            {% set v = no2 | float(0) %}
+            {% if v > 120 %}
+              {% set ns.score = [ns.score, 4] | max %}
+            {% elif v > 80 %}
+              {% set ns.score = [ns.score, 3] | max %}
+            {% elif v > 40 %}
+              {% set ns.score = [ns.score, 2] | max %}
+            {% endif %}
+          {% endif %}
+
+          {% if ns.datos == 0 %}
+            unknown
+          {% else %}
+            {{ ns.score }}
+          {% endif %}
+        icon: mdi:air-filter
+
+      - name: "ETSIT Calidad aire estado"
+        unique_id: etsit_calidad_aire_estado
+        state: >
+          {% set indice = states('sensor.etsit_calidad_aire_indice') %}
+          {% if indice in ['unknown', 'unavailable', 'none'] %}
+            Sin datos
+          {% elif indice | int(0) == 1 %}
+            Buena
+          {% elif indice | int(0) == 2 %}
+            Aceptable
+          {% elif indice | int(0) == 3 %}
+            Regular
+          {% else %}
+            Mala
+          {% endif %}
+        icon: >
+          {% set indice = states('sensor.etsit_calidad_aire_indice') | int(0) %}
+          {% if indice <= 1 %}
+            mdi:emoticon-happy
+          {% elif indice == 2 %}
+            mdi:emoticon-neutral
+          {% elif indice == 3 %}
+            mdi:emoticon-confused
+          {% else %}
+            mdi:emoticon-sad
+          {% endif %}
+
+      - name: "ETSIT Calidad aire recomendacion"
+        unique_id: etsit_calidad_aire_recomendacion
+        state: >
+          {% set estado = states('sensor.etsit_calidad_aire_estado') %}
+          {% if estado == 'Buena' %}
+            Calidad del aire adecuada
+          {% elif estado == 'Aceptable' %}
+            Vigilar evolución
+          {% elif estado == 'Regular' %}
+            Revisar ventilación y exposición
+          {% elif estado == 'Mala' %}
+            Reducir exposición exterior
+          {% else %}
+            Sin datos suficientes
+          {% endif %}
+        icon: mdi:message-alert-outline
+
+      # ------------------------------------------------------------
+      # Precipitaciones - Medidas principales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Precipitaciones altura agua"
+        unique_id: etsit_precipitaciones_altura_agua
+        state: >
+          {% set v = states('sensor.water_level_sensor') %}
+          {% if v not in ['unknown', 'unavailable', 'none'] %}
+            {{ v | float(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "cm"
+        icon: mdi:waves-arrow-up
+
+      - name: "ETSIT Precipitaciones lluvia acumulada"
+        unique_id: etsit_precipitaciones_lluvia_acumulada
+        state: >
+          {% set v = states('sensor.rain_gauge_sensor') %}
+          {% if v not in ['unknown', 'unavailable', 'none'] %}
+            {{ v | float(0) }}
+          {% else %}
+            0
+          {% endif %}
+        unit_of_measurement: "mm"
+        icon: mdi:weather-pouring
+
+      - name: "ETSIT Precipitaciones nivel riesgo"
+        unique_id: etsit_precipitaciones_nivel_riesgo
+        state: >
+          {% set agua = states('sensor.etsit_precipitaciones_altura_agua') | float(0) %}
+          {% set lluvia = states('sensor.etsit_precipitaciones_lluvia_acumulada') | float(0) %}
+          {% set inundacion = is_state('binary_sensor.flooding_sensor_alarm_a_nuevo', 'on') %}
+
+          {% if inundacion %}
+            Riesgo alto
+          {% elif agua >= 10 or lluvia >= 20 %}
+            Riesgo alto
+          {% elif agua >= 5 or lluvia >= 10 %}
+            Riesgo medio
+          {% elif agua > 0 or lluvia > 0 %}
+            Riesgo bajo
+          {% else %}
+            Sin riesgo
+          {% endif %}
+        icon: mdi:alert-circle
+
+      - name: "ETSIT Precipitaciones recomendacion"
+        unique_id: etsit_precipitaciones_recomendacion
+        state: >
+          {% set riesgo = states('sensor.etsit_precipitaciones_nivel_riesgo') %}
+          {% if riesgo == 'Riesgo alto' %}
+            Revisar posible inundación
+          {% elif riesgo == 'Riesgo medio' %}
+            Vigilar acumulación de agua
+          {% elif riesgo == 'Riesgo bajo' %}
+            Lluvia detectada sin riesgo relevante
+          {% else %}
+            Sin incidencias por precipitación
+          {% endif %}
+        icon: mdi:message-alert-outline
+
+      # ------------------------------------------------------------
+      # Precipitaciones - Estado de avisos
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Precipitaciones estado lluvia"
+        unique_id: etsit_precipitaciones_estado_lluvia
+        state: >
+          {% if is_state('binary_sensor.etsit_precipitaciones_aviso_lluvia', 'on') %}
+            Detectada
+          {% else %}
+            No detectada
+          {% endif %}
+        icon: mdi:weather-rainy
+
+      - name: "ETSIT Precipitaciones estado nivel agua"
+        unique_id: etsit_precipitaciones_estado_nivel_agua
+        state: >
+          {% if is_state('binary_sensor.etsit_precipitaciones_aviso_nivel_agua_alto', 'on') %}
+            Alto
+          {% else %}
+            Normal
+          {% endif %}
+        icon: mdi:waves-arrow-up
+
+      - name: "ETSIT Precipitaciones estado inundacion"
+        unique_id: etsit_precipitaciones_estado_inundacion
+        state: >
+          {% if is_state('binary_sensor.etsit_precipitaciones_inundacion_detectada', 'on') %}
+            Detectada
+          {% else %}
+            No detectada
+          {% endif %}
+        icon: mdi:waves
+
+      - name: "ETSIT Precipitaciones estado riesgo alto"
+        unique_id: etsit_precipitaciones_estado_riesgo_alto
+        state: >
+          {% if is_state('binary_sensor.etsit_precipitaciones_aviso_riesgo_alto', 'on') %}
+            Activo
+          {% else %}
+            Inactivo
+          {% endif %}
+        icon: mdi:alert-octagon
+
+      # ------------------------------------------------------------
+      # Residuos - Resumen
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Residuos llenado medio"
+        unique_id: etsit_residuos_llenado_medio
+        state: >
+          {% set valores = [
+            states('sensor.etsit_residuos_1_llenado') | float(0),
+            states('sensor.etsit_residuos_2_llenado') | float(0),
+            states('sensor.etsit_residuos_3_llenado') | float(0),
+            states('sensor.etsit_residuos_4_llenado') | float(0),
+            states('sensor.etsit_residuos_5_llenado') | float(0)
+          ] %}
+          {{ (valores | sum / valores | count) | round(1) }}
+        unit_of_measurement: "%"
+        icon: mdi:delete-percent
+
+      - name: "ETSIT Residuos contenedores en aviso"
+        unique_id: etsit_residuos_contenedores_en_aviso
+        state: >
+          {{
+            [
+              is_state('binary_sensor.etsit_residuos_1_alarma', 'on'),
+              is_state('binary_sensor.etsit_residuos_2_alarma', 'on'),
+              is_state('binary_sensor.etsit_residuos_3_alarma', 'on'),
+              is_state('binary_sensor.etsit_residuos_4_alarma', 'on'),
+              is_state('binary_sensor.etsit_residuos_5_alarma', 'on')
+            ] | select('eq', true) | list | count
+          }}
+        unit_of_measurement: "contenedores"
+        icon: mdi:trash-can-alert
+
+      - name: "ETSIT Residuos estado general"
+        unique_id: etsit_residuos_estado_general
+        state: >
+          {% set avisos = states('sensor.etsit_residuos_contenedores_en_aviso') | int(0) %}
+          {% set media = states('sensor.etsit_residuos_llenado_medio') | float(0) %}
+          {% if avisos > 0 %}
+            Vaciado requerido
+          {% elif media >= 60 %}
+            Seguimiento recomendado
+          {% else %}
+            Estado normal
+          {% endif %}
+        icon: mdi:recycle
+
+      - name: "ETSIT Residuos recomendacion"
+        unique_id: etsit_residuos_recomendacion
+        state: >
+          {% set avisos = states('sensor.etsit_residuos_contenedores_en_aviso') | int(0) %}
+          {% if avisos >= 3 %}
+            Programar ruta de vaciado completa
+          {% elif avisos > 0 %}
+            Revisar contenedores en aviso
+          {% else %}
+            Sin necesidad de vaciado inmediato
+          {% endif %}
+        icon: mdi:message-alert-outline
+
+      # ------------------------------------------------------------
+      # Residuos - Estado de avisos en texto
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Residuos 1 estado vaciado"
+        unique_id: etsit_residuos_1_estado_vaciado
+        state: >
+          {% if is_state('binary_sensor.etsit_residuos_1_alarma', 'on') %}
+            Vaciado requerido
+          {% else %}
+            Sin aviso
+          {% endif %}
+        icon: mdi:trash-can
+
+      - name: "ETSIT Residuos 2 estado vaciado"
+        unique_id: etsit_residuos_2_estado_vaciado
+        state: >
+          {% if is_state('binary_sensor.etsit_residuos_2_alarma', 'on') %}
+            Vaciado requerido
+          {% else %}
+            Sin aviso
+          {% endif %}
+        icon: mdi:trash-can
+
+      - name: "ETSIT Residuos 3 estado vaciado"
+        unique_id: etsit_residuos_3_estado_vaciado
+        state: >
+          {% if is_state('binary_sensor.etsit_residuos_3_alarma', 'on') %}
+            Vaciado requerido
+          {% else %}
+            Sin aviso
+          {% endif %}
+        icon: mdi:trash-can
+
+      - name: "ETSIT Residuos 4 estado vaciado"
+        unique_id: etsit_residuos_4_estado_vaciado
+        state: >
+          {% if is_state('binary_sensor.etsit_residuos_4_alarma', 'on') %}
+            Vaciado requerido
+          {% else %}
+            Sin aviso
+          {% endif %}
+        icon: mdi:trash-can
+
+      - name: "ETSIT Residuos 5 estado vaciado"
+        unique_id: etsit_residuos_5_estado_vaciado
+        state: >
+          {% if is_state('binary_sensor.etsit_residuos_5_alarma', 'on') %}
+            Vaciado requerido
+          {% else %}
+            Sin aviso
+          {% endif %}
+        icon: mdi:trash-can
+
+      # ------------------------------------------------------------
+      # Resumen general EUI ETSIT
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Resumen incidencias activas"
+        unique_id: etsit_resumen_incidencias_activas
+        state: >
+          {% set ns = namespace(total=0) %}
+
+          {# Red #}
+          {% if states('sensor.etsit_red_nodos_desconectados') | int(0) > 0 %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_alarma_calidad_red_baja', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {# Residuos #}
+          {% if states('sensor.etsit_residuos_contenedores_en_aviso') | int(0) > 0 %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {# Alumbrado #}
+          {% if states('sensor.etsit_alumbrado_fallos_en_luminarias') | int(0) > 0 %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if states('sensor.etsit_alumbrado_farolas_apagadas_con_encendido_recomendado') | int(0) > 0 %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if states('sensor.etsit_alumbrado_farolas_encendidas_con_luz_natural_suficiente') | int(0) > 0 %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {# Riego #}
+          {% if is_state('binary_sensor.etsit_riego_aviso_caudal_alto', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_riego_aviso_muchas_zonas_activas', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_riego_aviso_consumo_ciclo_alto', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_riego_aviso_duracion_alta', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {# Consumo electrico #}
+          {% if is_state('binary_sensor.etsit_consumo_aviso_potencia_alta', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_consumo_aviso_corriente_alta', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_consumo_aviso_factor_potencia_bajo', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {# Calidad del aire #}
+          {% if is_state('binary_sensor.etsit_calidad_aire_aviso_general', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {# Precipitaciones #}
+          {% if is_state('binary_sensor.etsit_precipitaciones_aviso_riesgo_alto', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+          {% if is_state('binary_sensor.etsit_precipitaciones_inundacion_detectada', 'on') %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+
+          {{ ns.total }}
+        unit_of_measurement: "incidencias"
+        icon: mdi:alert-circle-outline
+
+      - name: "ETSIT Resumen estado general"
+        unique_id: etsit_resumen_estado_general
+        state: >
+          {% set incidencias = states('sensor.etsit_resumen_incidencias_activas') | int(0) %}
+          {% set red = states('sensor.etsit_red_calidad_general') %}
+          {% set aire = states('sensor.etsit_calidad_aire_estado') %}
+          {% set precipitaciones = states('sensor.etsit_precipitaciones_nivel_riesgo') %}
+
+          {% if incidencias >= 5 %}
+            Atención prioritaria
+          {% elif precipitaciones == 'Riesgo alto' %}
+            Alerta por precipitaciones
+          {% elif aire == 'Mala' %}
+            Alerta por calidad del aire
+          {% elif red in ['Mala', 'Critica', 'Crítica'] %}
+            Alerta de comunicaciones
+          {% elif incidencias > 0 %}
+            Incidencias activas
+          {% else %}
+            Funcionamiento normal
+          {% endif %}
+        icon: >
+          {% set estado = states('sensor.etsit_resumen_estado_general') %}
+          {% if estado == 'Funcionamiento normal' %}
+            mdi:check-circle
+          {% elif estado == 'Incidencias activas' %}
+            mdi:alert
+          {% else %}
+            mdi:alert-octagon
+          {% endif %}
+
+      - name: "ETSIT Resumen recomendacion general"
+        unique_id: etsit_resumen_recomendacion_general
+        state: >
+          {% set incidencias = states('sensor.etsit_resumen_incidencias_activas') | int(0) %}
+          {% set residuos = states('sensor.etsit_residuos_contenedores_en_aviso') | int(0) %}
+          {% set precipitaciones = states('sensor.etsit_precipitaciones_nivel_riesgo') %}
+          {% set aire = states('sensor.etsit_calidad_aire_estado') %}
+          {% set red_desconectados = states('sensor.etsit_red_nodos_desconectados') | int(0) %}
+
+          {% if precipitaciones == 'Riesgo alto' %}
+            Revisar drenaje e inundaciones
+          {% elif aire in ['Regular', 'Mala'] %}
+            Revisar condiciones ambientales
+          {% elif red_desconectados > 0 %}
+            Revisar nodos IoT desconectados
+          {% elif residuos > 0 %}
+            Revisar contenedores en aviso
+          {% elif incidencias > 0 %}
+            Revisar avisos activos del sistema
+          {% else %}
+            Sin acciones urgentes
+          {% endif %}
+        icon: mdi:clipboard-check-outline
+
+  - binary_sensor:
+      # ------------------------------------------------------------
+      # Residuos - alarmas de llenado de prueba
+      # La alarma se activa cuando el llenado es mayor o igual al 80%.
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Residuos 1 alarma"
+        unique_id: etsit_residuos_1_alarma
+        device_class: problem
+        state: "{{ states('sensor.etsit_residuos_1_llenado') | float(0) >= 80 }}"
+
+      - name: "ETSIT Residuos 2 alarma"
+        unique_id: etsit_residuos_2_alarma
+        device_class: problem
+        state: "{{ states('sensor.etsit_residuos_2_llenado') | float(0) >= 80 }}"
+
+      - name: "ETSIT Residuos 3 alarma"
+        unique_id: etsit_residuos_3_alarma
+        device_class: problem
+        state: "{{ states('sensor.etsit_residuos_3_llenado') | float(0) >= 80 }}"
+
+      - name: "ETSIT Residuos 4 alarma"
+        unique_id: etsit_residuos_4_alarma
+        device_class: problem
+        state: "{{ states('sensor.etsit_residuos_4_llenado') | float(0) >= 80 }}"
+
+      - name: "ETSIT Residuos 5 alarma"
+        unique_id: etsit_residuos_5_alarma
+        device_class: problem
+        state: "{{ states('sensor.etsit_residuos_5_llenado') | float(0) >= 80 }}"
+
+      # ------------------------------------------------------------
+      # Estado de red - Alarmas
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Red alarma nodos desconectados"
+        unique_id: etsit_red_alarma_nodos_desconectados
+        device_class: problem
+        state: "{{ states('sensor.etsit_red_nodos_desconectados') | int(0) > 0 }}"
+
+      - name: "ETSIT Gateway alarma señal baja"
+        unique_id: etsit_gateway_alarma_senal_baja
+        device_class: problem
+        state: "{{ states('sensor.etsit_gateway_rssi') | int(0) < -80 }}"
+
+      - name: "ETSIT Repetidor alarma señal baja"
+        unique_id: etsit_repetidor_alarma_senal_baja
+        device_class: problem
+        state: "{{ states('sensor.etsit_repetidor_rssi') | int(0) < -80 }}"
+
+      - name: "ETSIT Alarma bateria baja"
+        unique_id: etsit_alarma_bateria_baja
+        device_class: problem
+        state: >
+          {{
+            [
+              states('sensor.etsit_residuos_1_bateria') | int(100),
+              states('sensor.etsit_residuos_2_bateria') | int(100),
+              states('sensor.etsit_residuos_3_bateria') | int(100),
+              states('sensor.etsit_residuos_4_bateria') | int(100),
+              states('sensor.etsit_residuos_5_bateria') | int(100),
+              states('sensor.etsit_riego_1_bateria') | int(100),
+              states('sensor.etsit_riego_2_bateria') | int(100),
+              states('sensor.etsit_riego_3_bateria') | int(100),
+              states('sensor.etsit_riego_4_bateria') | int(100),
+              states('sensor.etsit_riego_5_bateria') | int(100),
+              states('sensor.etsit_riego_6_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_1_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_2_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_3_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_4_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_5_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_6_bateria') | int(100),
+              states('sensor.etsit_sensor_uv_bateria') | int(100),
+              states('sensor.etsit_sensor_radiacion_solar_bateria') | int(100),
+              states('sensor.etsit_multisensor_ambiental_bateria') | int(100),
+              states('sensor.etsit_sensor_lluvia_bateria') | int(100),
+              states('sensor.etsit_sensor_calidad_aire_bateria') | int(100),
+              states('sensor.etsit_medidor_consumo_electrico_bateria') | int(100)
+            ] | min < 40
+          }}
+
+      - name: "ETSIT Alarma bateria critica"
+        unique_id: etsit_alarma_bateria_critica
+        device_class: problem
+        state: >
+          {{
+            [
+              states('sensor.etsit_residuos_1_bateria') | int(100),
+              states('sensor.etsit_residuos_2_bateria') | int(100),
+              states('sensor.etsit_residuos_3_bateria') | int(100),
+              states('sensor.etsit_residuos_4_bateria') | int(100),
+              states('sensor.etsit_residuos_5_bateria') | int(100),
+              states('sensor.etsit_riego_1_bateria') | int(100),
+              states('sensor.etsit_riego_2_bateria') | int(100),
+              states('sensor.etsit_riego_3_bateria') | int(100),
+              states('sensor.etsit_riego_4_bateria') | int(100),
+              states('sensor.etsit_riego_5_bateria') | int(100),
+              states('sensor.etsit_riego_6_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_1_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_2_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_3_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_4_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_5_bateria') | int(100),
+              states('sensor.etsit_aparcamiento_6_bateria') | int(100),
+              states('sensor.etsit_sensor_uv_bateria') | int(100),
+              states('sensor.etsit_sensor_radiacion_solar_bateria') | int(100),
+              states('sensor.etsit_multisensor_ambiental_bateria') | int(100),
+              states('sensor.etsit_sensor_lluvia_bateria') | int(100),
+              states('sensor.etsit_sensor_calidad_aire_bateria') | int(100),
+              states('sensor.etsit_medidor_consumo_electrico_bateria') | int(100)
+            ] | min < 15
+          }}
+
+      - name: "ETSIT Alarma calidad red baja"
+        unique_id: etsit_alarma_calidad_red_baja
+        device_class: problem
+        state: "{{ states('sensor.etsit_red_peor_rssi') | int(0) < -85 }}"
+
+      - name: "ETSIT Alarma hop count alto"
+        unique_id: etsit_alarma_hop_count_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_red_hop_count_medio') | int(0) > 2 }}"
+
+      # ------------------------------------------------------------
+      # Estado de red - Conectividad
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Gateway conexión"
+        unique_id: etsit_gateway_conexion
+        device_class: connectivity
+        state: "true"
+
+      # ------------------------------------------------------------
+      # Estado de red - Elementos conectados
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Repetidor 1 conexion"
+        unique_id: etsit_repetidor_1_conexion
+        device_class: connectivity
+        state: "true"
+
+      # Residuos
+      - name: "ETSIT Residuos 1 conexion"
+        unique_id: etsit_residuos_1_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Residuos 2 conexion"
+        unique_id: etsit_residuos_2_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Residuos 3 conexion"
+        unique_id: etsit_residuos_3_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Residuos 4 conexion"
+        unique_id: etsit_residuos_4_conexion
+        device_class: connectivity
+        state: "false"
+
+      - name: "ETSIT Residuos 5 conexion"
+        unique_id: etsit_residuos_5_conexion
+        device_class: connectivity
+        state: "true"
+
+      # Riego
+      - name: "ETSIT Riego 1 conexion"
+        unique_id: etsit_riego_1_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Riego 2 conexion"
+        unique_id: etsit_riego_2_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Riego 3 conexion"
+        unique_id: etsit_riego_3_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Riego 4 conexion"
+        unique_id: etsit_riego_4_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Riego 5 conexion"
+        unique_id: etsit_riego_5_conexion
+        device_class: connectivity
+        state: "false"
+
+      - name: "ETSIT Riego 6 conexion"
+        unique_id: etsit_riego_6_conexion
+        device_class: connectivity
+        state: "true"
+
+      # Aparcamiento
+      - name: "ETSIT Aparcamiento 1 conexion"
+        unique_id: etsit_aparcamiento_1_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 2 conexion"
+        unique_id: etsit_aparcamiento_2_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 3 conexion"
+        unique_id: etsit_aparcamiento_3_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 4 conexion"
+        unique_id: etsit_aparcamiento_4_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 5 conexion"
+        unique_id: etsit_aparcamiento_5_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 6 conexion"
+        unique_id: etsit_aparcamiento_6_conexion
+        device_class: connectivity
+        state: "false"
+
+      # Sensores ambientales
+      - name: "ETSIT Sensor UV conexion"
+        unique_id: etsit_sensor_uv_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Sensor radiacion solar conexion"
+        unique_id: etsit_sensor_radiacion_solar_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Multisensor ambiental conexion"
+        unique_id: etsit_multisensor_ambiental_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Sensor lluvia conexion"
+        unique_id: etsit_sensor_lluvia_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Sensor calidad aire conexion"
+        unique_id: etsit_sensor_calidad_aire_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Medidor consumo electrico conexion"
+        unique_id: etsit_medidor_consumo_electrico_conexion
+        device_class: connectivity
+        state: "true"
+
+      # Alumbrado
+      - name: "ETSIT Luz 01 conexion"
+        unique_id: etsit_luz_01_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 02 conexion"
+        unique_id: etsit_luz_02_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 03 conexion"
+        unique_id: etsit_luz_03_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 04 conexion"
+        unique_id: etsit_luz_04_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 05 conexion"
+        unique_id: etsit_luz_05_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 06 conexion"
+        unique_id: etsit_luz_06_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 07 conexion"
+        unique_id: etsit_luz_07_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 08 conexion"
+        unique_id: etsit_luz_08_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 09 conexion"
+        unique_id: etsit_luz_09_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 10 conexion"
+        unique_id: etsit_luz_10_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 11 conexion"
+        unique_id: etsit_luz_11_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 12 conexion"
+        unique_id: etsit_luz_12_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 13 conexion"
+        unique_id: etsit_luz_13_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 14 conexion"
+        unique_id: etsit_luz_14_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 15 conexion"
+        unique_id: etsit_luz_15_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 16 conexion"
+        unique_id: etsit_luz_16_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 17 conexion"
+        unique_id: etsit_luz_17_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 18 conexion"
+        unique_id: etsit_luz_18_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 19 conexion"
+        unique_id: etsit_luz_19_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 20 conexion"
+        unique_id: etsit_luz_20_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 21 conexion"
+        unique_id: etsit_luz_21_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 22 conexion"
+        unique_id: etsit_luz_22_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 23 conexion"
+        unique_id: etsit_luz_23_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 24 conexion"
+        unique_id: etsit_luz_24_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 25 conexion"
+        unique_id: etsit_luz_25_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 26 conexion"
+        unique_id: etsit_luz_26_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 27 conexion"
+        unique_id: etsit_luz_27_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 28 conexion"
+        unique_id: etsit_luz_28_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 29 conexion"
+        unique_id: etsit_luz_29_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 30 conexion"
+        unique_id: etsit_luz_30_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 31 conexion"
+        unique_id: etsit_luz_31_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 32 conexion"
+        unique_id: etsit_luz_32_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 33 conexion"
+        unique_id: etsit_luz_33_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 34 conexion"
+        unique_id: etsit_luz_34_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 35 conexion"
+        unique_id: etsit_luz_35_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 36 conexion"
+        unique_id: etsit_luz_36_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 37 conexion"
+        unique_id: etsit_luz_37_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 38 conexion"
+        unique_id: etsit_luz_38_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 39 conexion"
+        unique_id: etsit_luz_39_conexion
+        device_class: connectivity
+        state: "true"
+
+      - name: "ETSIT Luz 40 conexion"
+        unique_id: etsit_luz_40_conexion
+        device_class: connectivity
+        state: "true"
+
+      # ------------------------------------------------------------
+      # Iluminacion - Estado de luminarias
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Luz 01 estado"
+        unique_id: etsit_luz_01_estado
+        state: "{{ is_state('input_boolean.etsit_luz_01_control', 'on') }}"
+
+      - name: "ETSIT Luz 02 estado"
+        unique_id: etsit_luz_02_estado
+        state: "{{ is_state('input_boolean.etsit_luz_02_control', 'on') }}"
+
+      - name: "ETSIT Luz 03 estado"
+        unique_id: etsit_luz_03_estado
+        state: "{{ is_state('input_boolean.etsit_luz_03_control', 'on') }}"
+
+      - name: "ETSIT Luz 04 estado"
+        unique_id: etsit_luz_04_estado
+        state: "{{ is_state('input_boolean.etsit_luz_04_control', 'on') }}"
+
+      - name: "ETSIT Luz 05 estado"
+        unique_id: etsit_luz_05_estado
+        state: "{{ is_state('input_boolean.etsit_luz_05_control', 'on') }}"
+
+      - name: "ETSIT Luz 06 estado"
+        unique_id: etsit_luz_06_estado
+        state: "{{ is_state('input_boolean.etsit_luz_06_control', 'on') }}"
+
+      - name: "ETSIT Luz 07 estado"
+        unique_id: etsit_luz_07_estado
+        state: "{{ is_state('input_boolean.etsit_luz_07_control', 'on') }}"
+
+      - name: "ETSIT Luz 08 estado"
+        unique_id: etsit_luz_08_estado
+        state: "{{ is_state('input_boolean.etsit_luz_08_control', 'on') }}"
+
+      - name: "ETSIT Luz 09 estado"
+        unique_id: etsit_luz_09_estado
+        state: "{{ is_state('input_boolean.etsit_luz_09_control', 'on') }}"
+
+      - name: "ETSIT Luz 10 estado"
+        unique_id: etsit_luz_10_estado
+        state: "{{ is_state('input_boolean.etsit_luz_10_control', 'on') }}"
+
+      - name: "ETSIT Luz 11 estado"
+        unique_id: etsit_luz_11_estado
+        state: "{{ is_state('input_boolean.etsit_luz_11_control', 'on') }}"
+
+      - name: "ETSIT Luz 12 estado"
+        unique_id: etsit_luz_12_estado
+        state: "{{ is_state('input_boolean.etsit_luz_12_control', 'on') }}"
+
+      - name: "ETSIT Luz 13 estado"
+        unique_id: etsit_luz_13_estado
+        state: "{{ is_state('input_boolean.etsit_luz_13_control', 'on') }}"
+
+      - name: "ETSIT Luz 14 estado"
+        unique_id: etsit_luz_14_estado
+        state: "{{ is_state('input_boolean.etsit_luz_14_control', 'on') }}"
+
+      - name: "ETSIT Luz 15 estado"
+        unique_id: etsit_luz_15_estado
+        state: "{{ is_state('input_boolean.etsit_luz_15_control', 'on') }}"
+
+      - name: "ETSIT Luz 16 estado"
+        unique_id: etsit_luz_16_estado
+        state: "{{ is_state('input_boolean.etsit_luz_16_control', 'on') }}"
+
+      - name: "ETSIT Luz 17 estado"
+        unique_id: etsit_luz_17_estado
+        state: "{{ is_state('input_boolean.etsit_luz_17_control', 'on') }}"
+
+      - name: "ETSIT Luz 18 estado"
+        unique_id: etsit_luz_18_estado
+        state: "{{ is_state('input_boolean.etsit_luz_18_control', 'on') }}"
+
+      - name: "ETSIT Luz 19 estado"
+        unique_id: etsit_luz_19_estado
+        state: "{{ is_state('input_boolean.etsit_luz_19_control', 'on') }}"
+
+      - name: "ETSIT Luz 20 estado"
+        unique_id: etsit_luz_20_estado
+        state: "{{ is_state('input_boolean.etsit_luz_20_control', 'on') }}"
+
+      - name: "ETSIT Luz 21 estado"
+        unique_id: etsit_luz_21_estado
+        state: "{{ is_state('input_boolean.etsit_luz_21_control', 'on') }}"
+
+      - name: "ETSIT Luz 22 estado"
+        unique_id: etsit_luz_22_estado
+        state: "{{ is_state('input_boolean.etsit_luz_22_control', 'on') }}"
+
+      - name: "ETSIT Luz 23 estado"
+        unique_id: etsit_luz_23_estado
+        state: "{{ is_state('input_boolean.etsit_luz_23_control', 'on') }}"
+
+      - name: "ETSIT Luz 24 estado"
+        unique_id: etsit_luz_24_estado
+        state: "{{ is_state('input_boolean.etsit_luz_24_control', 'on') }}"
+
+      - name: "ETSIT Luz 25 estado"
+        unique_id: etsit_luz_25_estado
+        state: "{{ is_state('input_boolean.etsit_luz_25_control', 'on') }}"
+
+      - name: "ETSIT Luz 26 estado"
+        unique_id: etsit_luz_26_estado
+        state: "{{ is_state('input_boolean.etsit_luz_26_control', 'on') }}"
+
+      - name: "ETSIT Luz 27 estado"
+        unique_id: etsit_luz_27_estado
+        state: "{{ is_state('input_boolean.etsit_luz_27_control', 'on') }}"
+
+      - name: "ETSIT Luz 28 estado"
+        unique_id: etsit_luz_28_estado
+        state: "{{ is_state('input_boolean.etsit_luz_28_control', 'on') }}"
+
+      - name: "ETSIT Luz 29 estado"
+        unique_id: etsit_luz_29_estado
+        state: "{{ is_state('input_boolean.etsit_luz_29_control', 'on') }}"
+
+      - name: "ETSIT Luz 30 estado"
+        unique_id: etsit_luz_30_estado
+        state: "{{ is_state('input_boolean.etsit_luz_30_control', 'on') }}"
+
+      - name: "ETSIT Luz 31 estado"
+        unique_id: etsit_luz_31_estado
+        state: "{{ is_state('input_boolean.etsit_luz_31_control', 'on') }}"
+
+      - name: "ETSIT Luz 32 estado"
+        unique_id: etsit_luz_32_estado
+        state: "{{ is_state('input_boolean.etsit_luz_32_control', 'on') }}"
+
+      - name: "ETSIT Luz 33 estado"
+        unique_id: etsit_luz_33_estado
+        state: "{{ is_state('input_boolean.etsit_luz_33_control', 'on') }}"
+
+      - name: "ETSIT Luz 34 estado"
+        unique_id: etsit_luz_34_estado
+        state: "{{ is_state('input_boolean.etsit_luz_34_control', 'on') }}"
+
+      - name: "ETSIT Luz 35 estado"
+        unique_id: etsit_luz_35_estado
+        state: "{{ is_state('input_boolean.etsit_luz_35_control', 'on') }}"
+
+      - name: "ETSIT Luz 36 estado"
+        unique_id: etsit_luz_36_estado
+        state: "{{ is_state('input_boolean.etsit_luz_36_control', 'on') }}"
+
+      - name: "ETSIT Luz 37 estado"
+        unique_id: etsit_luz_37_estado
+        state: "{{ is_state('input_boolean.etsit_luz_37_control', 'on') }}"
+
+      - name: "ETSIT Luz 38 estado"
+        unique_id: etsit_luz_38_estado
+        state: "{{ is_state('input_boolean.etsit_luz_38_control', 'on') }}"
+
+      - name: "ETSIT Luz 39 estado"
+        unique_id: etsit_luz_39_estado
+        state: "{{ is_state('input_boolean.etsit_luz_39_control', 'on') }}"
+
+      - name: "ETSIT Luz 40 estado"
+        unique_id: etsit_luz_40_estado
+        state: "{{ is_state('input_boolean.etsit_luz_40_control', 'on') }}"
+
+      - name: "ETSIT Alumbrado presencia detectada"
+        unique_id: etsit_alumbrado_presencia_detectada
+        device_class: occupancy
+        state: "{{ is_state('input_boolean.etsit_presencia_alumbrado', 'on') }}"
+
+      # ------------------------------------------------------------
+      # Iluminacion - Avisos
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Alumbrado aviso consumo alto"
+        unique_id: etsit_alumbrado_aviso_consumo_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_alumbrado_consumo_actual_estimado') | int(0) > 1200 }}"
+
+      - name: "ETSIT Alumbrado aviso intensidad alta"
+        unique_id: etsit_alumbrado_aviso_intensidad_alta
+        device_class: problem
+        state: "{{ states('sensor.etsit_alumbrado_intensidad_media') | int(0) > 85 }}"
+
+      # ------------------------------------------------------------
+      # Aparcamiento - Estado de plazas
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Aparcamiento 1 ocupacion"
+        unique_id: etsit_aparcamiento_1_ocupacion
+        device_class: occupancy
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 2 ocupacion"
+        unique_id: etsit_aparcamiento_2_ocupacion
+        device_class: occupancy
+        state: "false"
+
+      - name: "ETSIT Aparcamiento 3 ocupacion"
+        unique_id: etsit_aparcamiento_3_ocupacion
+        device_class: occupancy
+        state: "true"
+
+      - name: "ETSIT Aparcamiento 4 ocupacion"
+        unique_id: etsit_aparcamiento_4_ocupacion
+        device_class: occupancy
+        state: "false"
+
+      - name: "ETSIT Aparcamiento 5 ocupacion"
+        unique_id: etsit_aparcamiento_5_ocupacion
+        device_class: occupancy
+        state: "false"
+
+      - name: "ETSIT Aparcamiento 6 ocupacion"
+        unique_id: etsit_aparcamiento_6_ocupacion
+        device_class: occupancy
+        state: "true"
+
+      # ------------------------------------------------------------
+      # Riego - Estado de zonas
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Riego 1 estado"
+        unique_id: etsit_riego_1_estado
+        state: "{{ is_state('input_boolean.etsit_riego_1_activo', 'on') }}"
+        icon: mdi:sprinkler
+
+      - name: "ETSIT Riego 2 estado"
+        unique_id: etsit_riego_2_estado
+        state: "{{ is_state('input_boolean.etsit_riego_2_activo', 'on') }}"
+        icon: mdi:sprinkler
+
+      - name: "ETSIT Riego 3 estado"
+        unique_id: etsit_riego_3_estado
+        state: "{{ is_state('input_boolean.etsit_riego_3_activo', 'on') }}"
+        icon: mdi:sprinkler
+
+      - name: "ETSIT Riego 4 estado"
+        unique_id: etsit_riego_4_estado
+        state: "{{ is_state('input_boolean.etsit_riego_4_activo', 'on') }}"
+        icon: mdi:sprinkler
+
+      - name: "ETSIT Riego 5 estado"
+        unique_id: etsit_riego_5_estado
+        state: "{{ is_state('input_boolean.etsit_riego_5_activo', 'on') }}"
+        icon: mdi:sprinkler
+
+      - name: "ETSIT Riego 6 estado"
+        unique_id: etsit_riego_6_estado
+        state: "{{ is_state('input_boolean.etsit_riego_6_activo', 'on') }}"
+        icon: mdi:sprinkler
+
+      # ------------------------------------------------------------
+      # Riego - Avisos ambientales
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Riego aviso humedad baja"
+        unique_id: etsit_riego_aviso_humedad_baja
+        state: "{{ states('sensor.etsit_riego_humedad_suelo_media') | float(0) < 30 }}"
+        icon: mdi:water-alert
+
+      - name: "ETSIT Riego aviso lluvia reciente"
+        unique_id: etsit_riego_aviso_lluvia_reciente
+        state: "{{ states('sensor.etsit_riego_lluvia_ultima_hora') | float(0) > 0 }}"
+        icon: mdi:weather-rainy
+
+      - name: "ETSIT Riego aviso lluvia prevista"
+        unique_id: etsit_riego_aviso_lluvia_prevista
+        state: "{{ states('sensor.etsit_riego_probabilidad_lluvia') | float(0) >= 70 }}"
+        icon: mdi:weather-pouring
+
+      - name: "ETSIT Riego aviso regando sin recomendacion"
+        unique_id: etsit_riego_aviso_regando_sin_recomendacion
+        state: >
+          {% set zonas_activas =
+            is_state('input_boolean.etsit_riego_1_activo', 'on') or
+            is_state('input_boolean.etsit_riego_2_activo', 'on') or
+            is_state('input_boolean.etsit_riego_3_activo', 'on') or
+            is_state('input_boolean.etsit_riego_4_activo', 'on') or
+            is_state('input_boolean.etsit_riego_5_activo', 'on') or
+            is_state('input_boolean.etsit_riego_6_activo', 'on')
+          %}
+          {{ zonas_activas and not is_state('sensor.etsit_riego_recomendacion', 'Regar recomendado') }}
+        icon: mdi:sprinkler-alert
+
+      # ------------------------------------------------------------
+      # Riego - Avisos de consumo de agua
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Riego aviso caudal alto"
+        unique_id: etsit_riego_aviso_caudal_alto
+        state: "{{ states('sensor.etsit_riego_caudal_actual_estimado') | float(0) > 24 }}"
+        icon: mdi:water-alert
+
+      - name: "ETSIT Riego aviso muchas zonas activas"
+        unique_id: etsit_riego_aviso_muchas_zonas_activas
+        state: "{{ states('sensor.etsit_riego_zonas_activas') | int(0) >= 4 }}"
+        icon: mdi:sprinkler-variant
+
+      - name: "ETSIT Riego aviso consumo ciclo alto"
+        unique_id: etsit_riego_aviso_consumo_ciclo_alto
+        state: "{{ states('sensor.etsit_riego_consumo_estimado_por_ciclo') | float(0) > 80 }}"
+        icon: mdi:water-pump
+
+      - name: "ETSIT Riego aviso duracion alta"
+        unique_id: etsit_riego_aviso_duracion_alta
+        state: "{{ states('input_number.etsit_riego_duracion') | int(0) > 600 }}"
+        icon: mdi:timer-alert
+
+      # ------------------------------------------------------------
+      # Consumo energetico - Avisos
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Consumo aviso potencia alta"
+        unique_id: etsit_consumo_aviso_potencia_alta
+        state: "{{ states('sensor.etsit_consumo_potencia') | float(0) > 3500 }}"
+        icon: mdi:flash-alert
+
+      - name: "ETSIT Consumo aviso corriente alta"
+        unique_id: etsit_consumo_aviso_corriente_alta
+        state: "{{ states('sensor.etsit_consumo_corriente') | float(0) > 15 }}"
+        icon: mdi:current-ac
+
+      - name: "ETSIT Consumo aviso factor potencia bajo"
+        unique_id: etsit_consumo_aviso_factor_potencia_bajo
+        state: "{{ states('sensor.etsit_consumo_factor_potencia') | float(1) < 0.85 }}"
+        icon: mdi:alert-circle
+
+      # ------------------------------------------------------------
+      # Calidad del aire - Avisos
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Calidad aire aviso PM2.5 alto"
+        unique_id: etsit_calidad_aire_aviso_pm25_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_calidad_aire_pm2_5') | float(0) > 25 }}"
+        icon: mdi:molecule
+
+      - name: "ETSIT Calidad aire aviso PM10 alto"
+        unique_id: etsit_calidad_aire_aviso_pm10_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_calidad_aire_pm10') | float(0) > 40 }}"
+        icon: mdi:blur
+
+      - name: "ETSIT Calidad aire aviso NO2 alto"
+        unique_id: etsit_calidad_aire_aviso_no2_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_calidad_aire_no2') | float(0) > 80 }}"
+        icon: mdi:molecule
+
+      - name: "ETSIT Calidad aire aviso CO alto"
+        unique_id: etsit_calidad_aire_aviso_co_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_calidad_aire_co') | float(0) > 1 }}"
+        icon: mdi:molecule-co
+
+      - name: "ETSIT Calidad aire aviso general"
+        unique_id: etsit_calidad_aire_aviso_general
+        device_class: problem
+        state: >
+          {{ states('sensor.etsit_calidad_aire_estado') in ['Regular', 'Mala'] }}
+        icon: mdi:air-filter
+
+      # ------------------------------------------------------------
+      # Precipitaciones - Avisos
+      # ------------------------------------------------------------
+
+      - name: "ETSIT Precipitaciones inundacion detectada"
+        unique_id: etsit_precipitaciones_inundacion_detectada
+        device_class: problem
+        state: "{{ is_state('binary_sensor.flooding_sensor_alarm_a_nuevo', 'on') }}"
+        icon: mdi:waves
+
+      - name: "ETSIT Precipitaciones aviso lluvia"
+        unique_id: etsit_precipitaciones_aviso_lluvia
+        device_class: problem
+        state: "{{ states('sensor.etsit_precipitaciones_lluvia_acumulada') | float(0) > 0 }}"
+        icon: mdi:weather-rainy
+
+      - name: "ETSIT Precipitaciones aviso nivel agua alto"
+        unique_id: etsit_precipitaciones_aviso_nivel_agua_alto
+        device_class: problem
+        state: "{{ states('sensor.etsit_precipitaciones_altura_agua') | float(0) >= 5 }}"
+        icon: mdi:waves-arrow-up
+
+      - name: "ETSIT Precipitaciones aviso riesgo alto"
+        unique_id: etsit_precipitaciones_aviso_riesgo_alto
+        device_class: problem
+        state: "{{ is_state('sensor.etsit_precipitaciones_nivel_riesgo', 'Riesgo alto') }}"
+        icon: mdi:alert-octagon
+
+sensor:
+  # ------------------------------------------------------------
+  # Riego - Tiempo activo semanal por zona
+  # ------------------------------------------------------------
+
+  - platform: history_stats
+    name: "ETSIT Riego zona 1 tiempo semanal"
+    entity_id: binary_sensor.etsit_riego_1_estado
+    state: "on"
+    type: time
+    start: "{{ now() - timedelta(days=7) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: "ETSIT Riego zona 2 tiempo semanal"
+    entity_id: binary_sensor.etsit_riego_2_estado
+    state: "on"
+    type: time
+    start: "{{ now() - timedelta(days=7) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: "ETSIT Riego zona 3 tiempo semanal"
+    entity_id: binary_sensor.etsit_riego_3_estado
+    state: "on"
+    type: time
+    start: "{{ now() - timedelta(days=7) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: "ETSIT Riego zona 4 tiempo semanal"
+    entity_id: binary_sensor.etsit_riego_4_estado
+    state: "on"
+    type: time
+    start: "{{ now() - timedelta(days=7) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: "ETSIT Riego zona 5 tiempo semanal"
+    entity_id: binary_sensor.etsit_riego_5_estado
+    state: "on"
+    type: time
+    start: "{{ now() - timedelta(days=7) }}"
+    end: "{{ now() }}"
+
+  - platform: history_stats
+    name: "ETSIT Riego zona 6 tiempo semanal"
+    entity_id: binary_sensor.etsit_riego_6_estado
+    state: "on"
+    type: time
+    start: "{{ now() - timedelta(days=7) }}"
+    end: "{{ now() }}"
+
+input_boolean:
+  # ------------------------------------------------------------
+  # Iluminacion - Control individual de luminarias
+  # ------------------------------------------------------------
+
+  etsit_luz_01_control:
+    name: ETSIT Luz 01
+    icon: mdi:lightbulb
+  etsit_luz_02_control:
+    name: ETSIT Luz 02
+    icon: mdi:lightbulb
+  etsit_luz_03_control:
+    name: ETSIT Luz 03
+    icon: mdi:lightbulb
+  etsit_luz_04_control:
+    name: ETSIT Luz 04
+    icon: mdi:lightbulb
+  etsit_luz_05_control:
+    name: ETSIT Luz 05
+    icon: mdi:lightbulb
+  etsit_luz_06_control:
+    name: ETSIT Luz 06
+    icon: mdi:lightbulb
+  etsit_luz_07_control:
+    name: ETSIT Luz 07
+    icon: mdi:lightbulb
+  etsit_luz_08_control:
+    name: ETSIT Luz 08
+    icon: mdi:lightbulb
+  etsit_luz_09_control:
+    name: ETSIT Luz 09
+    icon: mdi:lightbulb
+  etsit_luz_10_control:
+    name: ETSIT Luz 10
+    icon: mdi:lightbulb
+  etsit_luz_11_control:
+    name: ETSIT Luz 11
+    icon: mdi:lightbulb
+  etsit_luz_12_control:
+    name: ETSIT Luz 12
+    icon: mdi:lightbulb
+  etsit_luz_13_control:
+    name: ETSIT Luz 13
+    icon: mdi:lightbulb
+  etsit_luz_14_control:
+    name: ETSIT Luz 14
+    icon: mdi:lightbulb
+  etsit_luz_15_control:
+    name: ETSIT Luz 15
+    icon: mdi:lightbulb
+  etsit_luz_16_control:
+    name: ETSIT Luz 16
+    icon: mdi:lightbulb
+  etsit_luz_17_control:
+    name: ETSIT Luz 17
+    icon: mdi:lightbulb
+  etsit_luz_18_control:
+    name: ETSIT Luz 18
+    icon: mdi:lightbulb
+  etsit_luz_19_control:
+    name: ETSIT Luz 19
+    icon: mdi:lightbulb
+  etsit_luz_20_control:
+    name: ETSIT Luz 20
+    icon: mdi:lightbulb
+  etsit_luz_21_control:
+    name: ETSIT Luz 21
+    icon: mdi:lightbulb
+  etsit_luz_22_control:
+    name: ETSIT Luz 22
+    icon: mdi:lightbulb
+  etsit_luz_23_control:
+    name: ETSIT Luz 23
+    icon: mdi:lightbulb
+  etsit_luz_24_control:
+    name: ETSIT Luz 24
+    icon: mdi:lightbulb
+  etsit_luz_25_control:
+    name: ETSIT Luz 25
+    icon: mdi:lightbulb
+  etsit_luz_26_control:
+    name: ETSIT Luz 26
+    icon: mdi:lightbulb
+  etsit_luz_27_control:
+    name: ETSIT Luz 27
+    icon: mdi:lightbulb
+  etsit_luz_28_control:
+    name: ETSIT Luz 28
+    icon: mdi:lightbulb
+  etsit_luz_29_control:
+    name: ETSIT Luz 29
+    icon: mdi:lightbulb
+  etsit_luz_30_control:
+    name: ETSIT Luz 30
+    icon: mdi:lightbulb
+  etsit_luz_31_control:
+    name: ETSIT Luz 31
+    icon: mdi:lightbulb
+  etsit_luz_32_control:
+    name: ETSIT Luz 32
+    icon: mdi:lightbulb
+  etsit_luz_33_control:
+    name: ETSIT Luz 33
+    icon: mdi:lightbulb
+  etsit_luz_34_control:
+    name: ETSIT Luz 34
+    icon: mdi:lightbulb
+  etsit_luz_35_control:
+    name: ETSIT Luz 35
+    icon: mdi:lightbulb
+  etsit_luz_36_control:
+    name: ETSIT Luz 36
+    icon: mdi:lightbulb
+  etsit_luz_37_control:
+    name: ETSIT Luz 37
+    icon: mdi:lightbulb
+  etsit_luz_38_control:
+    name: ETSIT Luz 38
+    icon: mdi:lightbulb
+  etsit_luz_39_control:
+    name: ETSIT Luz 39
+    icon: mdi:lightbulb
+  etsit_luz_40_control:
+    name: ETSIT Luz 40
+    icon: mdi:lightbulb
+
+  etsit_aparcamiento_1_reserva:
+    name: ETSIT Aparcamiento 1 reserva
+    icon: mdi:calendar-check
+  etsit_aparcamiento_2_reserva:
+    name: ETSIT Aparcamiento 2 reserva
+    icon: mdi:calendar-check
+  etsit_aparcamiento_3_reserva:
+    name: ETSIT Aparcamiento 3 reserva
+    icon: mdi:calendar-check
+  etsit_aparcamiento_4_reserva:
+    name: ETSIT Aparcamiento 4 reserva
+    icon: mdi:calendar-check
+  etsit_aparcamiento_5_reserva:
+    name: ETSIT Aparcamiento 5 reserva
+    icon: mdi:calendar-check
+  etsit_aparcamiento_6_reserva:
+    name: ETSIT Aparcamiento 6 reserva
+    icon: mdi:calendar-check
+
+  etsit_riego_1_activo:
+    name: ETSIT Riego 1 activo
+    icon: mdi:sprinkler
+  etsit_riego_2_activo:
+    name: ETSIT Riego 2 activo
+    icon: mdi:sprinkler
+  etsit_riego_3_activo:
+    name: ETSIT Riego 3 activo
+    icon: mdi:sprinkler
+  etsit_riego_4_activo:
+    name: ETSIT Riego 4 activo
+    icon: mdi:sprinkler
+  etsit_riego_5_activo:
+    name: ETSIT Riego 5 activo
+    icon: mdi:sprinkler
+  etsit_riego_6_activo:
+    name: ETSIT Riego 6 activo
+    icon: mdi:sprinkler
+
+  etsit_presencia_alumbrado:
+    name: ETSIT Presencia zona alumbrado
+    icon: mdi:motion-sensor
+
+  etsit_alumbrado_modo_manual_intensidad:
+    name: ETSIT Alumbrado modo manual intensidad
+    icon: mdi:tune-variant
+
+automation:
+  - alias: "Auto Watering: Zone 1 High Temperature"
+    description: "Starts watering Zone 1 when temperature is too high, with a cooldown constraint."
+    mode: single # Ensures the automation doesn't run multiple times concurrently
+    trigger:
+      - trigger: numeric_state
+        # Make sure this matches the exact entity_id generated by your MQTT sensor
+        entity_id: sensor.earth_meter_0a_38_0_temp_ciec
+        above: 30 # REPLACE with your desired temperature threshold in °C
+    condition:
+      - condition: template
+        # This template checks if the automation has run in the last X seconds.
+        # 43200 seconds = 12 hours. Change this number to your desired cooldown interval.
+        value_template: >
+          {{ state_attr('automation.auto_watering_zone_1_high_temperature', 'last_triggered') == None or 
+            (as_timestamp(now()) - as_timestamp(state_attr('automation.auto_watering_zone_1_high_temperature', 'last_triggered'))) > 43200 }}
+    action:
+      - action: script.regar_zona_1
+        data:
+          # Pass the override directly here (e.g., 600 seconds = 10 minutes)
+          duration_override: 60
+  - alias: "Smart Parking: Dynamic DALI Light Boost (On-Demand Fetch)"
+    mode: restart
+    trigger:
+      - trigger: state
+        entity_id: binary_sensor.smart_parking_49_b7_00
+        to: "on"
+    action:
+      # 1. Fire the GET request and save the JSON response to a variable
+      - action: rest_command.get_dali_light_level
+        data:
+          device_uid: "B10000CF210CEF00"
+        response_variable: api_response
+
+      # 2. Extract the dimming value from the response
+      - variables:
+          # 'api_response.content' holds the parsed JSON body
+          previous_dim_level: >
+            {{ api_response.content.objects[0].resources[0].value | default(0) }}
+
+      # 3. Boost the light to 100%
+      - action: rest_command.set_dali_light_intensity
+        data:
+          device_uid: "B10000CF210CEF00"
+          gateway_mac: "F8:DC:7A:70:36:79"
+          intensity: 255
+
+      # 4. Keep it bright while they park
+      - delay: "00:05:00"
+
+      # 5. Restore the exact previous level using the snapshot
+      - action: rest_command.set_dali_light_intensity
+        data:
+          device_uid: "B10000CF210CEF00"
+          gateway_mac: "F8:DC:7A:70:36:79"
+          intensity: "{{ (previous_dim_level * 255 / 100) | int }}"
+
+  # ------------------------------------------------------------
+  # Aparcamiento - Evitar reservas en plazas ocupadas
+  # ------------------------------------------------------------
+
+  - alias: "ETSIT Aparcamiento cancelar reserva plaza 1 ocupada"
+    triggers:
+      - trigger: state
+        entity_id:
+          - input_boolean.etsit_aparcamiento_1_reserva
+          - binary_sensor.etsit_aparcamiento_1_ocupacion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.etsit_aparcamiento_1_ocupacion
+        state: "on"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_aparcamiento_1_reserva
+    mode: single
+
+  - alias: "ETSIT Aparcamiento cancelar reserva plaza 2 ocupada"
+    triggers:
+      - trigger: state
+        entity_id:
+          - input_boolean.etsit_aparcamiento_2_reserva
+          - binary_sensor.etsit_aparcamiento_2_ocupacion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.etsit_aparcamiento_2_ocupacion
+        state: "on"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_aparcamiento_2_reserva
+    mode: single
+
+  - alias: "ETSIT Aparcamiento cancelar reserva plaza 3 ocupada"
+    triggers:
+      - trigger: state
+        entity_id:
+          - input_boolean.etsit_aparcamiento_3_reserva
+          - binary_sensor.etsit_aparcamiento_3_ocupacion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.etsit_aparcamiento_3_ocupacion
+        state: "on"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_aparcamiento_3_reserva
+    mode: single
+
+  - alias: "ETSIT Aparcamiento cancelar reserva plaza 4 ocupada"
+    triggers:
+      - trigger: state
+        entity_id:
+          - input_boolean.etsit_aparcamiento_4_reserva
+          - binary_sensor.etsit_aparcamiento_4_ocupacion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.etsit_aparcamiento_4_ocupacion
+        state: "on"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_aparcamiento_4_reserva
+    mode: single
+
+  - alias: "ETSIT Aparcamiento cancelar reserva plaza 5 ocupada"
+    triggers:
+      - trigger: state
+        entity_id:
+          - input_boolean.etsit_aparcamiento_5_reserva
+          - binary_sensor.etsit_aparcamiento_5_ocupacion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.etsit_aparcamiento_5_ocupacion
+        state: "on"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_aparcamiento_5_reserva
+    mode: single
+
+  - alias: "ETSIT Aparcamiento cancelar reserva plaza 6 ocupada"
+    triggers:
+      - trigger: state
+        entity_id:
+          - input_boolean.etsit_aparcamiento_6_reserva
+          - binary_sensor.etsit_aparcamiento_6_ocupacion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.etsit_aparcamiento_6_ocupacion
+        state: "on"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_aparcamiento_6_reserva
+    mode: single
+
+  # ------------------------------------------------------------
+  # Riego - Apagar zona al terminar temporizador
+  # ------------------------------------------------------------
+
+  - alias: "ETSIT Riego apagar zona 1 al terminar temporizador"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_timer_riego_1
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_1_activo
+    mode: single
+
+  - alias: "ETSIT Riego apagar zona 2 al terminar temporizador"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_timer_riego_2
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_2_activo
+    mode: single
+
+  - alias: "ETSIT Riego apagar zona 3 al terminar temporizador"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_timer_riego_3
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_3_activo
+    mode: single
+
+  - alias: "ETSIT Riego apagar zona 4 al terminar temporizador"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_timer_riego_4
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_4_activo
+    mode: single
+
+  - alias: "ETSIT Riego apagar zona 5 al terminar temporizador"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_timer_riego_5
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_5_activo
+    mode: single
+
+  - alias: "ETSIT Riego apagar zona 6 al terminar temporizador"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_timer_riego_6
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_6_activo
+    mode: single
+
+  - alias: "ETSIT Alumbrado encender por baja luz natural"
+    triggers:
+      - trigger: state
+        entity_id: sensor.etsit_alumbrado_recomendacion
+
+      - trigger: state
+        entity_id: sensor.etsit_alumbrado_luminarias_encendidas
+        for:
+          minutes: 1
+
+    conditions:
+      - condition: state
+        entity_id: sensor.etsit_alumbrado_recomendacion
+        state: "Encender luminarias"
+
+      - condition: template
+        value_template: >
+          {% set encendidas = states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0) %}
+          {% set totales = states('sensor.etsit_alumbrado_luminarias_totales') | int(40) %}
+          {{ encendidas < totales }}
+
+    actions:
+      - action: input_boolean.turn_on
+        target:
+          entity_id:
+            - input_boolean.etsit_luz_01_control
+            - input_boolean.etsit_luz_02_control
+            - input_boolean.etsit_luz_03_control
+            - input_boolean.etsit_luz_04_control
+            - input_boolean.etsit_luz_05_control
+            - input_boolean.etsit_luz_06_control
+            - input_boolean.etsit_luz_07_control
+            - input_boolean.etsit_luz_08_control
+            - input_boolean.etsit_luz_09_control
+            - input_boolean.etsit_luz_10_control
+            - input_boolean.etsit_luz_11_control
+            - input_boolean.etsit_luz_12_control
+            - input_boolean.etsit_luz_13_control
+            - input_boolean.etsit_luz_14_control
+            - input_boolean.etsit_luz_15_control
+            - input_boolean.etsit_luz_16_control
+            - input_boolean.etsit_luz_17_control
+            - input_boolean.etsit_luz_18_control
+            - input_boolean.etsit_luz_19_control
+            - input_boolean.etsit_luz_20_control
+            - input_boolean.etsit_luz_21_control
+            - input_boolean.etsit_luz_22_control
+            - input_boolean.etsit_luz_23_control
+            - input_boolean.etsit_luz_24_control
+            - input_boolean.etsit_luz_25_control
+            - input_boolean.etsit_luz_26_control
+            - input_boolean.etsit_luz_27_control
+            - input_boolean.etsit_luz_28_control
+            - input_boolean.etsit_luz_29_control
+            - input_boolean.etsit_luz_30_control
+            - input_boolean.etsit_luz_31_control
+            - input_boolean.etsit_luz_32_control
+            - input_boolean.etsit_luz_33_control
+            - input_boolean.etsit_luz_34_control
+            - input_boolean.etsit_luz_35_control
+            - input_boolean.etsit_luz_36_control
+            - input_boolean.etsit_luz_37_control
+            - input_boolean.etsit_luz_38_control
+            - input_boolean.etsit_luz_39_control
+            - input_boolean.etsit_luz_40_control
+    mode: single
+
+  - alias: "ETSIT Alumbrado apagar por luz natural suficiente"
+    triggers:
+      - trigger: state
+        entity_id: sensor.etsit_alumbrado_recomendacion
+
+      - trigger: state
+        entity_id: sensor.etsit_alumbrado_luminarias_encendidas
+        for:
+          minutes: 1
+
+    conditions:
+      - condition: state
+        entity_id: sensor.etsit_alumbrado_recomendacion
+        state: "Mantener apagadas"
+
+      - condition: template
+        value_template: >
+          {{ states('sensor.etsit_alumbrado_luminarias_encendidas') | int(0) > 0 }}
+
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.etsit_luz_01_control
+            - input_boolean.etsit_luz_02_control
+            - input_boolean.etsit_luz_03_control
+            - input_boolean.etsit_luz_04_control
+            - input_boolean.etsit_luz_05_control
+            - input_boolean.etsit_luz_06_control
+            - input_boolean.etsit_luz_07_control
+            - input_boolean.etsit_luz_08_control
+            - input_boolean.etsit_luz_09_control
+            - input_boolean.etsit_luz_10_control
+            - input_boolean.etsit_luz_11_control
+            - input_boolean.etsit_luz_12_control
+            - input_boolean.etsit_luz_13_control
+            - input_boolean.etsit_luz_14_control
+            - input_boolean.etsit_luz_15_control
+            - input_boolean.etsit_luz_16_control
+            - input_boolean.etsit_luz_17_control
+            - input_boolean.etsit_luz_18_control
+            - input_boolean.etsit_luz_19_control
+            - input_boolean.etsit_luz_20_control
+            - input_boolean.etsit_luz_21_control
+            - input_boolean.etsit_luz_22_control
+            - input_boolean.etsit_luz_23_control
+            - input_boolean.etsit_luz_24_control
+            - input_boolean.etsit_luz_25_control
+            - input_boolean.etsit_luz_26_control
+            - input_boolean.etsit_luz_27_control
+            - input_boolean.etsit_luz_28_control
+            - input_boolean.etsit_luz_29_control
+            - input_boolean.etsit_luz_30_control
+            - input_boolean.etsit_luz_31_control
+            - input_boolean.etsit_luz_32_control
+            - input_boolean.etsit_luz_33_control
+            - input_boolean.etsit_luz_34_control
+            - input_boolean.etsit_luz_35_control
+            - input_boolean.etsit_luz_36_control
+            - input_boolean.etsit_luz_37_control
+            - input_boolean.etsit_luz_38_control
+            - input_boolean.etsit_luz_39_control
+            - input_boolean.etsit_luz_40_control
+    mode: single
+
+  - alias: "ETSIT Alumbrado sincronizar intensidad automatica"
+    triggers:
+      - trigger: state
+        entity_id:
+          - sensor.etsit_alumbrado_intensidad_recomendada
+          - sensor.etsit_irradiancia_solar
+          - sensor.etsit_solar_nubosidad
+          - input_boolean.etsit_presencia_alumbrado
+          - input_boolean.etsit_alumbrado_modo_manual_intensidad
+    conditions:
+      - condition: state
+        entity_id: input_boolean.etsit_alumbrado_modo_manual_intensidad
+        state: "off"
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.etsit_alumbrado_intensidad_general
+        data:
+          value: "{{ states('sensor.etsit_alumbrado_intensidad_recomendada') | int(0) }}"
+    mode: restart
+
+  - alias: "ETSIT Alumbrado gestionar temporizador intensidad manual"
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.etsit_alumbrado_modo_manual_intensidad
+
+    actions:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.etsit_alumbrado_modo_manual_intensidad
+                state: "on"
+            sequence:
+              - action: timer.start
+                target:
+                  entity_id: timer.etsit_alumbrado_intensidad_manual
+
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.etsit_alumbrado_modo_manual_intensidad
+                state: "off"
+            sequence:
+              - action: timer.cancel
+                target:
+                  entity_id: timer.etsit_alumbrado_intensidad_manual
+
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.etsit_alumbrado_intensidad_general
+                data:
+                  value: "{{ states('sensor.etsit_alumbrado_intensidad_recomendada') | int(0) }}"
+
+    mode: restart
+
+  - alias: "ETSIT Alumbrado volver a intensidad automatica"
+    triggers:
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.etsit_alumbrado_intensidad_manual
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_alumbrado_modo_manual_intensidad
+
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.etsit_alumbrado_intensidad_general
+        data:
+          value: "{{ states('sensor.etsit_alumbrado_intensidad_recomendada') | int(0) }}"
+    mode: single
+
+rest_command:
+  get_dali_light_level:
+    url: "https://cedint-lab.pdxeng.ch:8000/cms/api/v1.0/data/last/devices/{{ device_uid }}/objects"
+    method: get
+    headers:
+      Authorization: "Bearer {{ state_attr('sensor.pxd_cms_tokenizer', 'token') }}"
+      Content-Type: application/json
+
+input_number:
+  # ------------------------------------------------------------
+  # Riego - Duracion de riego
+  # ------------------------------------------------------------
+
+  etsit_riego_duracion:
+    name: ETSIT Riego duracion
+    min: 10
+    max: 3600
+    step: 10
+    unit_of_measurement: "s"
+    icon: mdi:timer-outline
+
+  etsit_alumbrado_intensidad_general:
+    name: ETSIT Alumbrado intensidad general
+    min: 0
+    max: 100
+    step: 5
+    unit_of_measurement: "%"
+    icon: mdi:brightness-6
+
+timer:
+  # ------------------------------------------------------------
+  # Riego - Temporizadores visuales
+  # ------------------------------------------------------------
+
+  etsit_timer_riego_1:
+    name: ETSIT Timer riego 1
+  etsit_timer_riego_2:
+    name: ETSIT Timer riego 2
+  etsit_timer_riego_3:
+    name: ETSIT Timer riego 3
+  etsit_timer_riego_4:
+    name: ETSIT Timer riego 4
+  etsit_timer_riego_5:
+    name: ETSIT Timer riego 5
+  etsit_timer_riego_6:
+    name: ETSIT Timer riego 6
+
+  etsit_alumbrado_intensidad_manual:
+    name: ETSIT Alumbrado temporizador intensidad manual
+    duration: "00:30:00"
+
+script:
+  # ------------------------------------------------------------
+  # Riego - Scripts de control
+  # ------------------------------------------------------------
+
+  etsit_regar_zona_1:
+    alias: "ETSIT Regar zona 1"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.etsit_riego_1_activo
+      - action: timer.start
+        target:
+          entity_id: timer.etsit_timer_riego_1
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_zona_1:
+    alias: "ETSIT Cancelar zona 1"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_1_activo
+      - action: timer.cancel
+        target:
+          entity_id: timer.etsit_timer_riego_1
+    mode: single
+
+  etsit_regar_zona_2:
+    alias: "ETSIT Regar zona 2"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.etsit_riego_2_activo
+      - action: timer.start
+        target:
+          entity_id: timer.etsit_timer_riego_2
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_zona_2:
+    alias: "ETSIT Cancelar zona 2"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_2_activo
+      - action: timer.cancel
+        target:
+          entity_id: timer.etsit_timer_riego_2
+    mode: single
+
+  etsit_regar_zona_3:
+    alias: "ETSIT Regar zona 3"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.etsit_riego_3_activo
+      - action: timer.start
+        target:
+          entity_id: timer.etsit_timer_riego_3
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_zona_3:
+    alias: "ETSIT Cancelar zona 3"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_3_activo
+      - action: timer.cancel
+        target:
+          entity_id: timer.etsit_timer_riego_3
+    mode: single
+
+  etsit_regar_zona_4:
+    alias: "ETSIT Regar zona 4"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.etsit_riego_4_activo
+      - action: timer.start
+        target:
+          entity_id: timer.etsit_timer_riego_4
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_zona_4:
+    alias: "ETSIT Cancelar zona 4"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_4_activo
+      - action: timer.cancel
+        target:
+          entity_id: timer.etsit_timer_riego_4
+    mode: single
+
+  etsit_regar_zona_5:
+    alias: "ETSIT Regar zona 5"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.etsit_riego_5_activo
+      - action: timer.start
+        target:
+          entity_id: timer.etsit_timer_riego_5
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_zona_5:
+    alias: "ETSIT Cancelar zona 5"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_5_activo
+      - action: timer.cancel
+        target:
+          entity_id: timer.etsit_timer_riego_5
+    mode: single
+
+  etsit_regar_zona_6:
+    alias: "ETSIT Regar zona 6"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.etsit_riego_6_activo
+      - action: timer.start
+        target:
+          entity_id: timer.etsit_timer_riego_6
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_zona_6:
+    alias: "ETSIT Cancelar zona 6"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.etsit_riego_6_activo
+      - action: timer.cancel
+        target:
+          entity_id: timer.etsit_timer_riego_6
+    mode: single
+
+  etsit_regar_todas_zonas:
+    alias: "ETSIT Regar todas las zonas"
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id:
+            - input_boolean.etsit_riego_1_activo
+            - input_boolean.etsit_riego_2_activo
+            - input_boolean.etsit_riego_3_activo
+            - input_boolean.etsit_riego_4_activo
+            - input_boolean.etsit_riego_5_activo
+            - input_boolean.etsit_riego_6_activo
+
+      - action: timer.start
+        target:
+          entity_id:
+            - timer.etsit_timer_riego_1
+            - timer.etsit_timer_riego_2
+            - timer.etsit_timer_riego_3
+            - timer.etsit_timer_riego_4
+            - timer.etsit_timer_riego_5
+            - timer.etsit_timer_riego_6
+        data:
+          duration: "{{ states('input_number.etsit_riego_duracion') | int(60) }}"
+    mode: single
+
+  etsit_cancelar_todas_zonas:
+    alias: "ETSIT Cancelar todas las zonas"
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.etsit_riego_1_activo
+            - input_boolean.etsit_riego_2_activo
+            - input_boolean.etsit_riego_3_activo
+            - input_boolean.etsit_riego_4_activo
+            - input_boolean.etsit_riego_5_activo
+            - input_boolean.etsit_riego_6_activo
+
+      - action: timer.cancel
+        target:
+          entity_id:
+            - timer.etsit_timer_riego_1
+            - timer.etsit_timer_riego_2
+            - timer.etsit_timer_riego_3
+            - timer.etsit_timer_riego_4
+            - timer.etsit_timer_riego_5
+            - timer.etsit_timer_riego_6
+    mode: single
